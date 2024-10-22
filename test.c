@@ -6,4 +6,4 @@ printf("hello world")
 
 /* you suck */
 
-// renee youre a loser
+// bartek youre a loser
