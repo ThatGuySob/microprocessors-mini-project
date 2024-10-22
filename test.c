@@ -3,3 +3,5 @@ int main()
 {
 printf("hello world")
 }
+
+/* you suck */
