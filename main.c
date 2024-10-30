@@ -141,7 +141,7 @@ void SysTick_Handler(void) {
 
     if (gameOver == 0) {  // Only increment if game is not over
         tickCounter++;
-        if (tickCounter >= 1000) {  // Increment every second
+        if (tickCounter >= 200) {  // Increment every second
             score++;
             displayScore(score);  // Update score display
             tickCounter = 0;
