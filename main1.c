@@ -1,3 +1,9 @@
+/*
+program description: A game based on the offline google dino game, where instead of the dinosaur as the main character, it's been changed to Kirby and create a more immersive game, the theme of the background has been changed to compliment the character rather than having the original cacti and birds.
+
+Authors: Renée, Blessing and Bartek
+*/
+
 #include <stm32f031x6.h>
 #include "display.h"
 
@@ -11,18 +17,18 @@ void enablePullUp(GPIO_TypeDef *Port, uint32_t BitNumber);
 void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
 
 //game variables
-int dino_y = 50;
-int jump_velocity = 0;
-int is_jumping = 0;
-int gravity = 1;
-int jumpUp = -10;
-int obstacle_x = 100;
-int score = 0;
-int gameover = 0;
+int kirby_y = 50; //position of kirby
+int jumpUp = -10; //initial velocity of jump (negative so it jump over and not under)
+int jump_velocity = 0; //current velocity of the jump
+int is_jumping = 0; //checks to see if kirby is jumping or not. 1 = yes, 0 = no
+int gravity = 1; //how fast kirby falls
+int obstacle_x = 100; //x position of the obstacles
+int score = 0; // keeps track of the score
+int gameover = 0; //self explanatory. 1 = gameover, 0 = game not over
 
-void updateDinoPos();
-void updateObstaclePos();
-int collisionCheck();
+void updatekirbyPos(); //updates kirby's position
+void updateObstaclePos(); //updates the obstacles position
+int collisionCheck(); //checks if kirby and obstacle collides
 
 
 volatile uint32_t milliseconds;
@@ -60,7 +66,7 @@ int main()
 	initClock();
 	initSysTick();
 	setupIO();
-	putImage(20,dino_y,16,16,run1,0,0);
+	putImage(20,kirby_y,16,16,run1,0,0);
 	displayScore(score);
 	uint32_t scoreUpdate = 0;
 	
@@ -72,14 +78,16 @@ int main()
 			jump_velocity = jumpUp; //jump starts velocity
 		} 
 
-		updateDinoPos();
+		// function calls
+		updatekirbyPos();
 		updateObstaclePos();
 
-		fillRectangle(20,dino_y+16,16,16,0);
-		putImage(20, dino_y,20,20,run1,0,0);
-		putImage(20, dino_y,20,20,run2,0,0);
-		putImage(20, dino_y,20,20,run3,0,0);
-		putImage(20, dino_y,20,20,run2,0,0);
+		// chatacter animations
+		fillRectangle(20,kirby_y+16,16,16,0);
+		putImage(20, kirby_y,20,20,run1,0,0);
+		putImage(20, kirby_y,20,20,run2,0,0);
+		putImage(20, kirby_y,20,20,run3,0,0);
+		putImage(20, kirby_y,20,20,run2,0,0);
 		fillRectangle(obstacle_x+12,50,16,16,0);
 		putImage(obstacle_x,50,20,20,star1,0,0);
 		putImage(obstacle_x,50,20,20,star2,0,0);
@@ -193,17 +201,18 @@ void setupIO()
 }
 
 
-//Dino mech functions 2
-void updateDinoPos(){
+//kirby jumping mech function
+void updatekirbyPos(){
+	// checks if kirby is jumping
     if(is_jumping){ 
-        dino_y += jump_velocity;   // Apply the velocity to dino's Y position
-        jump_velocity += gravity;  // Gravity slows the upward movement
+        kirby_y += jump_velocity; // apply the jump velocity to kirby's Y position
+        jump_velocity += gravity; // gravity slows the upward movement
 
-        // Check if dino hits the ground
-        if(dino_y >= 50){
-            dino_y = 50;           // Reset to ground level
-            jump_velocity = 0;     // Reset jump velocity
-            is_jumping = 0;        // End the jump
+        // check if kirby hits the ground after jumping
+        if(kirby_y >= 50){
+            kirby_y = 50; // reset to ground level
+            jump_velocity = 0; // resets jump velocity
+            is_jumping = 0; // resets the jumping checker
         }
     }
 }
@@ -211,12 +220,14 @@ void updateDinoPos(){
 
 void updateObstaclePos(){
 	obstacle_x -= 2; //moves obstacles left
-	if(obstacle_x < 0){ //generates the obstacle
-		obstacle_x = 110;
-		score++;
+	
+	// checks to see if the obstacle is off the screen
+	if(obstacle_x < -20){ 
+		obstacle_x = 110; // if yes, the position of the obstacle resets
+		score++; // tracks the score
 	}
 }
 
 int collisionCheck(){
-	return isInside(obstacle_x, 50,12,16,20, dino_y); //checks to see if dino collides with the obstacle
+	return isInside(obstacle_x, 50,12,16,20, kirby_y); //checks to see if kirby collides with the obstacle by seeing if their co-ordinated overlap
 }
