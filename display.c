@@ -25,9 +25,6 @@ static void data(uint8_t data);
 static void ResetLow(void);
 static void ResetHigh(void);
 
-
-
-
 void display_begin()
 {
 
@@ -126,7 +123,7 @@ void display_begin()
 	delay(1);
 	command(0x2c);   // put display in to write mode
 
-	fillRectangle(0,0,SCREEN_WIDTH, SCREEN_HEIGHT, 0x0);  // black out the screen
+	fillRectangle(0,0,SCREEN_WIDTH, SCREEN_HEIGHT - 50, 0x0FF0);  // black out the screen
 }
 void ResetLow()
 {
@@ -630,6 +627,6 @@ void displayScore(int score) {
     int x = SCREEN_WIDTH - 30;  // Adjust based on font width
     int y = 5;
 
-    fillRectangle(x, y, 40, 10, 0x0000);  // Clear with background color
-    printText(scoreText, x, y, 0xFFFF, 0x0000);  // Display in white
+    fillRectangle(x, y, 40, 10, 0x0FF0);  // Clear with background color
+    printText(scoreText, x, y, 0x0, 0x0FF0);  // Display in white
 }
