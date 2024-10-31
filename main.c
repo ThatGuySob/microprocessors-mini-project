@@ -58,6 +58,10 @@ int main()
 	putImage(20,dino_y,16,16,white,0,0);
 	displayScore(score);
 	uint32_t scoreUpdate = 0;
+
+
+	int frame_counter = 0;            // To track which animation frame to display
+	unsigned int last_frame_time = 0; // Time when last frame was updated
 	
 
 	while(1)
@@ -75,6 +79,52 @@ int main()
 
 		fillRectangle(obstacle_x+12,50,16,16,backgroundColour);
 		putImage(obstacle_x,50,16,16,deco2,0,0);
+
+		// Only update the frame every 100 ms (adjust for preferred frame rate)
+		if (milliseconds - last_frame_time >= 100) 
+		{
+			frame_counter = (frame_counter + 1) % 4; // Loop through frames 0 to 3
+			last_frame_time = milliseconds;
+		}
+
+		// Clear the previous Dino position
+		fillRectangle(20, dino_y + 16, 20, 20, 0);
+
+		// Display the correct animation based on jumping and falling state
+		if (is_jumping && jump_velocity > 0) 
+		{ // Jumping up: show animation frames
+			switch (frame_counter) 
+			{
+				case 0: putImage(20, dino_y, 20, 20, run1, 0, 0); break;
+				case 1: putImage(20, dino_y, 20, 20, run2, 0, 0); break;
+				case 2: putImage(20, dino_y, 20, 20, run3, 0, 0); break;
+				case 3: putImage(20, dino_y, 20, 20, run2, 0, 0); break;
+			}
+		} 
+		else if (is_jumping && jump_velocity <= 0) 
+		{ // Falling down: show fall frame
+			putImage(20, dino_y, 20, 20, fall, 0, 0);
+		}
+		else 
+		{ // Default running animation when on the ground
+			switch (frame_counter) 
+			{
+				case 0: putImage(20, dino_y, 20, 20, run1, 0, 0); break;
+				case 1: putImage(20, dino_y, 20, 20, run2, 0, 0); break;
+				case 2: putImage(20, dino_y, 20, 20, run3, 0, 0); break;
+				case 3: putImage(20, dino_y, 20, 20, run2, 0, 0); break;
+			}
+		}
+
+		// Clear previous position and display current frame for obstacle
+		fillRectangle(obstacle_x + 12, 50, 20, 20, 0);
+		switch (frame_counter) 
+		{
+			case 0: putImage(obstacle_x, 50, 20, 20, star1, 0, 0); break;
+			case 1: putImage(obstacle_x, 50, 20, 20, star2, 0, 0); break;
+			case 2: putImage(obstacle_x, 50, 20, 20, star3, 0, 0); break;
+			case 3: putImage(obstacle_x, 50, 20, 20, star4, 0, 0); break;
+		}
 
 		if ((milliseconds - scoreUpdate) >= 200) {
 			score++;
