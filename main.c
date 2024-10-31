@@ -9,6 +9,8 @@ void setupIO();
 int isInside(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t px, uint16_t py);
 void enablePullUp(GPIO_TypeDef *Port, uint32_t BitNumber);
 void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
+void makeBackground();
+
 
 //game variables
 int dino_y = 50;
@@ -19,6 +21,9 @@ int jumpUp = -10;
 int obstacle_x = 100;
 int score = 0;
 int gameover = 0;
+const uint16_t backgroundColour = 0x0FF0;
+const uint16_t bottomColour = 0x00FF;
+
 
 void updateDinoPos();
 void updateObstaclePos();
@@ -65,9 +70,10 @@ int main()
 		updateDinoPos();
 		updateObstaclePos();
 
-		fillRectangle(20,dino_y+16,16,16,0);
+		fillRectangle(20,dino_y+16,16,16,backgroundColour);
 		putImage(20, dino_y,16,16,white,0,0);
-		fillRectangle(obstacle_x+12,50,16,16,0);
+
+		fillRectangle(obstacle_x+12,50,16,16,backgroundColour);
 		putImage(obstacle_x,50,16,16,deco2,0,0);
 
 		if ((milliseconds - scoreUpdate) >= 200) {
@@ -77,7 +83,13 @@ int main()
 		}
 
 		if(collisionCheck()){
+			fillRectangle(0,0,128,160, 0x0);  // black out the screen
 			printTextX2("game over",10,20,RGBToWord(255,0,0),0);
+			printText("Press Left to Reset",0,40,RGBToWord(255,0,0),0);
+			if ((GPIOB->IDR & (1 << 5))==0) // left pressed
+			{			
+				return 1;
+			}
 			break;
 		}
 		delay(50);
@@ -189,12 +201,13 @@ void updateDinoPos(){
             is_jumping = 0;        // End the jump
         }
     }
+
 }
 
 
 void updateObstaclePos(){
 	obstacle_x -= 2; //moves obstacles left
-	if(obstacle_x < 0){ //generates the obstacle
+	if(obstacle_x < -15.5){ //generates the obstacle
 		obstacle_x = 110;
 		score++;
 	}
@@ -202,4 +215,10 @@ void updateObstaclePos(){
 
 int collisionCheck(){
 	return isInside(obstacle_x, 50,12,16,20, dino_y); //checks to see if dino collides with the obstacle
+}
+
+void makeBackground() {
+	fillRectangle(0,0,128, (160 - 50), backgroundColour);  // black out the screen
+	fillRectangle(0,110,128, (160 - 110), bottomColour);  // black out the screen
+
 }
