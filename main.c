@@ -52,6 +52,7 @@ int main()
 	setupIO();
 	putImage(20,dino_y,16,16,white,0,0);
 	displayScore(score);
+	uint32_t scoreUpdate = 0;
 	
 
 	while(1)
@@ -68,6 +69,12 @@ int main()
 		putImage(20, dino_y,16,16,white,0,0);
 		fillRectangle(obstacle_x+12,50,16,16,0);
 		putImage(obstacle_x,50,16,16,deco2,0,0);
+
+		if ((milliseconds - scoreUpdate) >= 200) {
+			score++;
+			displayScore(score);
+			scoreUpdate = milliseconds;
+		}
 
 		if(collisionCheck()){
 			printTextX2("game over",10,20,RGBToWord(255,0,0),0);
@@ -86,16 +93,6 @@ void initSysTick(void)
 }
 void SysTick_Handler(void) {
 	milliseconds++;
-    // static int tickCounter = 0;
-
-    // if (gameover == 0) {  // Only increment if game is not over
-    //     tickCounter++;
-    //     if (tickCounter >= 200) {  // Increment every second
-    //         score++;
-    //         displayScore(score);  // Update score display
-    //         tickCounter = 0;
-    //     }
-    // }
 }
 void initClock(void)
 {
