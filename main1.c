@@ -11,7 +11,6 @@ void enablePullUp(GPIO_TypeDef *Port, uint32_t BitNumber);
 void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
 void makeBackground();
 
-
 //game variables
 int dino_y = 110;
 int jump_velocity = 0;
@@ -29,6 +28,7 @@ int highScore = 0;
 void updateDinoPos();
 void updateObstaclePos();
 int collisionCheck();
+void startMenu();
 
 
 volatile uint32_t milliseconds;
@@ -71,12 +71,13 @@ int main()
 	initSysTick();
 	setupIO();
 	putImage(20,dino_y,16,16,run1,0,0);
-	displayScore(score);
-	makeBackground();
+	displayScore(score, highScore);
+	startMenu(); //function that displays the start menu at the beginning
+	//makeBackground();
 	uint32_t scoreUpdate = 0;
 
 
-	int frame_counter = 0;            // To track which animation frame to display
+	int frame_counter = 0; // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was updated
 	
 
@@ -91,8 +92,15 @@ int main()
        
     }
 	
-		delay(50); // Maintain overall game speed
+	delay(50); // Maintain overall game speed
 	return 0;
+}
+
+//start menu function that displays the text
+void startMenu(){
+	fillRectangle(0,0,128,160,backgroundColour);
+	printTextX2("Kirby Jump", 10,20,RGBToWord(255,255,255),0x8abc);
+	printText("Press Left to start",5,60,RGBToWord(255,255,255),0x8abc);
 }
 
 void resetGame(void)
@@ -109,11 +117,9 @@ void resetGame(void)
 
 void runGame()
 {
-	
 	uint32_t scoreUpdate = 0;
 	int frame_counter = 0;            // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was updated
-	int temp = 0;
 
 	while (1)
 	{
@@ -189,9 +195,6 @@ void runGame()
 			fillRectangle(0,0,128,160, 0x0);  // black out the screen
 			printTextX2("game over",10,20,RGBToWord(255,0,0),0);
 			printText("Press Left to Reset",0,40,RGBToWord(255,0,0),0);
-			
-
-
 		
 			break;
 		}
