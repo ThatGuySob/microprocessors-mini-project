@@ -91,7 +91,6 @@ int main()
        
     }
 	
-
 		delay(50); // Maintain overall game speed
 	return 0;
 }
@@ -108,7 +107,7 @@ void resetGame(void)
 	makeBackground();
 }
 
-void runGame(void)
+void runGame()
 {
 	
 	uint32_t scoreUpdate = 0;
@@ -166,6 +165,7 @@ void runGame(void)
 
 		// Clear previous position and display current frame for obstacle
 		fillRectangle(obstacle_x - 2, 48, 24, 24, backgroundColour);
+
 		switch (frame_counter) 
 		{
 			case 0: putImage(obstacle_x, 50, 20, 20, star1, 0, 0); break;
