@@ -9,9 +9,11 @@ void setupIO();
 int isInside(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t px, uint16_t py);
 void enablePullUp(GPIO_TypeDef *Port, uint32_t BitNumber);
 void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
+void makeBackground();
+
 
 //game variables
-int dino_y = 50;
+int dino_y = 110;
 int jump_velocity = 0;
 int is_jumping = 0;
 int gravity = 1;
@@ -19,6 +21,10 @@ int jumpUp = -10;
 int obstacle_x = 100;
 int score = 0;
 int gameover = 0;
+const uint16_t backgroundColour = 0x8ABC;
+const uint16_t bottomColour = 0x3506;
+int highScore = 0;
+
 
 void updateDinoPos();
 void updateObstaclePos();
@@ -64,12 +70,51 @@ int main()
 	initClock();
 	initSysTick();
 	setupIO();
-	putImage(20, dino_y, 16, 16, run1, 0, 0);
+	putImage(20,dino_y,16,16,run1,0,0);
 	displayScore(score);
+	makeBackground();
 	uint32_t scoreUpdate = 0;
+
 
 	int frame_counter = 0;            // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was updated
+	
+
+    while (1)
+    {
+		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
+			{		
+				resetGame();  // Reset game state before starting the game
+        		runGame();
+				continue;
+			}
+       
+    }
+	
+
+		delay(50); // Maintain overall game speed
+	return 0;
+}
+
+void resetGame(void)
+{
+    // Reset game variables and state
+    score = 0;                  // Reset score
+    dino_y = 50;                // Reset Dino position
+    is_jumping = 0;            // Reset jump state
+    jump_velocity = 0;         // Reset jump velocity
+    obstacle_x = 100;          // Reset obstacle position
+    displayScore(score, highScore);       // Display initial score
+	makeBackground();
+}
+
+void runGame(void)
+{
+	
+	uint32_t scoreUpdate = 0;
+	int frame_counter = 0;            // To track which animation frame to display
+	unsigned int last_frame_time = 0; // Time when last frame was updated
+	int temp = 0;
 
 	while (1)
 	{
@@ -90,8 +135,8 @@ int main()
 		}
 
 		// Clear the previous Dino position
-		fillRectangle(20, dino_y + 16, 20, 20, 0);
-
+		fillRectangle(20, dino_y + 6, 24, 24, backgroundColour);
+		fillRectangle(20, dino_y - 10, 24, 24, backgroundColour);
 		// Display the correct animation based on jumping and falling state
 		if (is_jumping && jump_velocity > 0) 
 		{ // Jumping up: show animation frames
@@ -106,6 +151,7 @@ int main()
 		else if (is_jumping && jump_velocity <= 0) 
 		{ // Falling down: show fall frame
 			putImage(20, dino_y, 20, 20, fall, 0, 0);
+			
 		}
 		else 
 		{ // Default running animation when on the ground
@@ -119,7 +165,7 @@ int main()
 		}
 
 		// Clear previous position and display current frame for obstacle
-		fillRectangle(obstacle_x + 12, 50, 20, 20, 0);
+		fillRectangle(obstacle_x - 2, 48, 24, 24, backgroundColour);
 		switch (frame_counter) 
 		{
 			case 0: putImage(obstacle_x, 50, 20, 20, star1, 0, 0); break;
@@ -131,19 +177,27 @@ int main()
 		if ((milliseconds - scoreUpdate) >= 200) 
 		{
 			score++;
-			displayScore(score);
+			if (highScore <= score)
+			{
+				highScore = score;
+			}
+			displayScore(score, highScore);
 			scoreUpdate = milliseconds;
 		}
 
-		if (collisionCheck()) 
-		{
-			printTextX2("game over", 10, 20, RGBToWord(255, 0, 0), 0);
+		if(collisionCheck()){
+			fillRectangle(0,0,128,160, 0x0);  // black out the screen
+			printTextX2("game over",10,20,RGBToWord(255,0,0),0);
+			printText("Press Left to Reset",0,40,RGBToWord(255,0,0),0);
+			
+
+
+		
 			break;
 		}
 
 		delay(50); // Maintain overall game speed
 	}
-	return 0;
 }
 void initSysTick(void)
 {
@@ -250,12 +304,13 @@ void updateDinoPos(){
             is_jumping = 0;        // End the jump
         }
     }
+
 }
 
 
 void updateObstaclePos(){
 	obstacle_x -= 2; //moves obstacles left
-	if(obstacle_x < 0){ //generates the obstacle
+	if(obstacle_x < -15.5){ //generates the obstacle
 		obstacle_x = 110;
 		score++;
 	}
@@ -263,4 +318,10 @@ void updateObstaclePos(){
 
 int collisionCheck(){
 	return isInside(obstacle_x, 50,12,16,20, dino_y); //checks to see if dino collides with the obstacle
+}
+
+void makeBackground() {
+	fillRectangle(0,0,128, 110, backgroundColour);  // black out the screen
+	fillRectangle(0,110,128, 50, bottomColour);  // black out the screen
+
 }
