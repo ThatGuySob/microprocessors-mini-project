@@ -17,7 +17,7 @@ int dino_y = 90;
 int jump_velocity = 0;
 int is_jumping = 0;
 int gravity = 1;
-int jumpUp = -10;
+int jumpUp = -11;
 int obstacle_x = 100;
 int score = 0;
 int gameover = 0;
@@ -138,12 +138,12 @@ void runGame()
 		// Clear the previous Dino position
 		if (dino_y < 90	)
 		{
-			fillRectangle(20, dino_y + 10, 20, 20, backgroundColour);
+			fillRectangle(20, dino_y + 11, 20, 20, backgroundColour);
 		}
 
 		if (dino_y <= 90)
 		{
-			fillRectangle(20, dino_y - 10, 20, 20, backgroundColour);
+			fillRectangle(20, dino_y - 11, 20, 20, backgroundColour);
 		}
 		// Display the correct animation based on jumping and falling state
 		if (is_jumping && jump_velocity > 0) 
@@ -318,7 +318,14 @@ void updateObstaclePos(){
 }
 
 int collisionCheck(){
-	return isInside(obstacle_x, 90,12,16,20, dino_y); //checks to see if dino collides with the obstacle
+    int obstacle_y = 94;      // Fixed Y position of the obstacle
+
+    // Check for overlap in both x and y coordinates
+    if ((20 < obstacle_x + 20) && (20 + 20 > obstacle_x) && //20 = x-coordinate
+        (dino_y < obstacle_y + 20) && (dino_y + 20 > obstacle_y)) {
+        return 1; // Collision detected
+    }
+    return 0; // No collision
 }
 
 void makeBackground() {
