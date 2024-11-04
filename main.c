@@ -91,6 +91,8 @@ int main()
 		{		
 			resetGame();  // Reset game state before starting the game
 			runGame();
+			delay(2000);
+			startMenu();
 			continue;
 		} 
 		else if ((GPIOB->IDR & (1 << 4))==0) // right pressed
@@ -207,9 +209,7 @@ void runGame()
 
 		if(collisionCheck()){
 			fillRectangle(0,0,128,160, 0x0);  // black out the screen
-			printTextX2("Game Over",10,20,RGBToWord(255,0,0),0);
-			printText("Press Left",30,50,RGBToWord(255,0,0),0);
-			printText("to Reset",37,60,RGBToWord(255,0,0),0);
+			printTextX2("Game Over",10,60,RGBToWord(255,0,0),0);
 		
 			break;
 		}
@@ -374,16 +374,16 @@ void multiplayer() {
 	fillRectangle(0,0,128,160,backgroundColour);
 
 	if (player1 > player2) {
-		printTextX2("Player 1", 15, 80, RGBToWord(0, 255, 0), backgroundColour);
-		printTextX2("Wins!", 37, 100, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Player 1", 15, 60, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Wins!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);
 	} 
 	else if (player1 < player2) {
-		printTextX2("Player 2", 15, 80, RGBToWord(0, 255, 0), backgroundColour);
-		printTextX2("Wins!", 37, 100, RGBToWord(0, 255, 0), backgroundColour);	
+		printTextX2("Player 2", 15, 60, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Wins!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);	
 	}
 	else {
-		printTextX2("Its a", 30, 80, RGBToWord(0, 255, 0), backgroundColour);
-		printTextX2("Draw!", 37, 100, RGBToWord(0, 255, 0), backgroundColour);	
+		printTextX2("Its a", 30, 60, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Draw!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);	
 	}
 
 	delay(2000);
