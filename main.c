@@ -13,7 +13,7 @@ void makeBackground();
 
 
 //game variables
-int dino_y = 50;
+int dino_y = 90;
 int jump_velocity = 0;
 int is_jumping = 0;
 int gravity = 1;
@@ -21,13 +21,15 @@ int jumpUp = -10;
 int obstacle_x = 100;
 int score = 0;
 int gameover = 0;
-const uint16_t backgroundColour = 0x0FF0;
-const uint16_t bottomColour = 0x00FF;
+const uint16_t backgroundColour = 0x8ABC;
+const uint16_t bottomColour = 0x3506;
+int highScore = 0;
 
 
 void updateDinoPos();
 void updateObstaclePos();
 int collisionCheck();
+void startMenu();
 
 
 volatile uint32_t milliseconds;
@@ -70,13 +72,56 @@ int main()
 	initSysTick();
 	setupIO();
 	putImage(20,dino_y,16,16,run1,0,0);
-	displayScore(score);
+	displayScore(score, highScore);
+	startMenu(); //function that displays the start menu at the beginning
+	//makeBackground();
 	uint32_t scoreUpdate = 0;
 
 
 	int frame_counter = 0;            // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was updated
 	
+
+    while (1)
+    {
+		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
+			{		
+				resetGame();  // Reset game state before starting the game
+        		runGame();
+				continue;
+			}
+       
+    }
+	
+	delay(50); // Maintain overall game speed
+	return 0;
+}
+
+//start menu function that displays the text
+void startMenu(){
+	fillRectangle(0,0,128,160,backgroundColour);
+	printTextX2("Kirby Jump", 10,20,RGBToWord(255,255,255),0x8abc);
+	printText("Press Left to start",5,60,RGBToWord(255,255,255),0x8abc);
+}
+
+void resetGame(void)
+{
+    // Reset game variables and state
+    score = 0;                  // Reset score
+    dino_y = 90;                // Reset Dino position
+    is_jumping = 0;            // Reset jump state
+    jump_velocity = 0;         // Reset jump velocity
+    obstacle_x = 100;          // Reset obstacle position
+    displayScore(score, highScore);       // Display initial score
+	makeBackground();
+}
+
+void runGame()
+{
+	
+	uint32_t scoreUpdate = 0;
+	int frame_counter = 0;            // To track which animation frame to display
+	unsigned int last_frame_time = 0; // Time when last frame was update
 
 	while (1)
 	{
@@ -97,8 +142,15 @@ int main()
 		}
 
 		// Clear the previous Dino position
-		fillRectangle(20, dino_y + 16, 20, 20, backgroundColour);
+		if (dino_y < 90	)
+		{
+			fillRectangle(20, dino_y + 10, 20, 20, backgroundColour);
+		}
 
+		if (dino_y <= 90)
+		{
+			fillRectangle(20, dino_y - 10, 20, 20, backgroundColour);
+		}
 		// Display the correct animation based on jumping and falling state
 		if (is_jumping && jump_velocity > 0) 
 		{ // Jumping up: show animation frames
@@ -113,6 +165,7 @@ int main()
 		else if (is_jumping && jump_velocity <= 0) 
 		{ // Falling down: show fall frame
 			putImage(20, dino_y, 20, 20, fall, 0, 0);
+			
 		}
 		else 
 		{ // Default running animation when on the ground
@@ -126,19 +179,24 @@ int main()
 		}
 
 		// Clear previous position and display current frame for obstacle
-		fillRectangle(obstacle_x + 12, 50, 20, 20, backgroundColour);
+		fillRectangle(obstacle_x, 86, 24, 24, backgroundColour);
+
 		switch (frame_counter) 
 		{
-			case 0: putImage(obstacle_x, 50, 20, 20, star1, 0, 0); break;
-			case 1: putImage(obstacle_x, 50, 20, 20, star2, 0, 0); break;
-			case 2: putImage(obstacle_x, 50, 20, 20, star3, 0, 0); break;
-			case 3: putImage(obstacle_x, 50, 20, 20, star4, 0, 0); break;
+			case 0: putImage(obstacle_x, 90, 20, 20, star1, 0, 0); break;
+			case 1: putImage(obstacle_x, 90, 20, 20, star2, 0, 0); break;
+			case 2: putImage(obstacle_x, 90, 20, 20, star3, 0, 0); break;
+			case 3: putImage(obstacle_x, 90, 20, 20, star4, 0, 0); break;
 		}
 
 		if ((milliseconds - scoreUpdate) >= 200) 
 		{
 			score++;
-			displayScore(score);
+			if (highScore <= score)
+			{
+				highScore = score;
+			}
+			displayScore(score, highScore);
 			scoreUpdate = milliseconds;
 		}
 
@@ -146,16 +204,12 @@ int main()
 			fillRectangle(0,0,128,160, 0x0);  // black out the screen
 			printTextX2("game over",10,20,RGBToWord(255,0,0),0);
 			printText("Press Left to Reset",0,40,RGBToWord(255,0,0),0);
-			if ((GPIOB->IDR & (1 << 5))==0) // left pressed
-			{			
-				return 1;
-			}
+		
 			break;
 		}
 
 		delay(50); // Maintain overall game speed
 	}
-	return 0;
 }
 void initSysTick(void)
 {
@@ -256,8 +310,8 @@ void updateDinoPos(){
         jump_velocity += gravity;  // Gravity slows the upward movement
 
         // Check if dino hits the ground
-        if(dino_y >= 50){
-            dino_y = 50;           // Reset to ground level
+        if(dino_y >= 90){
+            dino_y = 90;           // Reset to ground level
             jump_velocity = 0;     // Reset jump velocity
             is_jumping = 0;        // End the jump
         }
@@ -268,18 +322,18 @@ void updateDinoPos(){
 
 void updateObstaclePos(){
 	obstacle_x -= 2; //moves obstacles left
-	if(obstacle_x < -15.5){ //generates the obstacle
-		obstacle_x = 110;
+	if(obstacle_x < -15.5)
+	{ //generates the obstacle
+		obstacle_x = 108;
 		score++;
 	}
 }
 
 int collisionCheck(){
-	return isInside(obstacle_x, 50,12,16,20, dino_y); //checks to see if dino collides with the obstacle
+	return isInside(obstacle_x, 90,12,16,20, dino_y); //checks to see if dino collides with the obstacle
 }
 
 void makeBackground() {
-	fillRectangle(0,0,128, (160 - 50), backgroundColour);  // black out the screen
-	fillRectangle(0,110,128, (160 - 110), bottomColour);  // black out the screen
-
+	fillRectangle(0,0,128, 110, backgroundColour);  // black out the screen
+	fillRectangle(0,110,128, 50, bottomColour);  // black out the screen
 }
