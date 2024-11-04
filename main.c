@@ -75,12 +75,6 @@ int main()
 	displayScore(score, highScore);
 	startMenu(); //function that displays the start menu at the beginning
 	//makeBackground();
-	uint32_t scoreUpdate = 0;
-
-
-	int frame_counter = 0;            // To track which animation frame to display
-	unsigned int last_frame_time = 0; // Time when last frame was updated
-	
 
     while (1)
     {
@@ -154,13 +148,7 @@ void runGame()
 		// Display the correct animation based on jumping and falling state
 		if (is_jumping && jump_velocity > 0) 
 		{ // Jumping up: show animation frames
-			switch (frame_counter) 
-			{
-				case 0: putImage(20, dino_y, 20, 20, run1, 0, 0); break;
-				case 1: putImage(20, dino_y, 20, 20, run2, 0, 0); break;
-				case 2: putImage(20, dino_y, 20, 20, run3, 0, 0); break;
-				case 3: putImage(20, dino_y, 20, 20, run2, 0, 0); break;
-			}
+			putImage(20, dino_y, 20, 20, fall, 0, 0);
 		} 
 		else if (is_jumping && jump_velocity <= 0) 
 		{ // Falling down: show fall frame
