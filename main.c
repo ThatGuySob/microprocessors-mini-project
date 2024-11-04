@@ -88,12 +88,17 @@ int main()
     while (1)
     {
 		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
-			{		
-				resetGame();  // Reset game state before starting the game
-        		runGame();
-				continue;
-			}
-       
+		{		
+			resetGame();  // Reset game state before starting the game
+			runGame();
+			continue;
+		} 
+		else if ((GPIOB->IDR & (1 << 4))==0) // right pressed
+       	{
+			resetGame();  // Reset game state before starting the game
+			multiplayer();
+			continue;
+	   	}
     }
 	
 	delay(50); // Maintain overall game speed
@@ -125,7 +130,6 @@ void resetGame(void)
 
 void runGame()
 {
-	
 	uint32_t scoreUpdate = 0;
 	int frame_counter = 0;            // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was update
@@ -348,13 +352,38 @@ void makeBackground() {
 }
 
 void multiplayer() {
+	int player1;
+	int player2;
+
+	// Player 1's Run Through
 	fillRectangle(0,0,128,160,backgroundColour);
 	printTextX2("Player 1", 6,20,RGBToWord(255,255,255),0x8abc);
-	delay(10000);
+	delay(2000);
+	resetGame();
 	runGame();
+	player1 = score;
 
+	// Player 2's Run Through
 	fillRectangle(0,0,128,160,backgroundColour);
 	printTextX2("Player 2", 6,20,RGBToWord(255,255,255),0x8abc);
-	delay(10000);
+	delay(2000);
+	resetGame();
 	runGame();
+	player2 = score;
+
+	if (player1 > player2) {
+		printTextX2("Player 1", 15, 80, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Wins!", 37, 100, RGBToWord(0, 255, 0), backgroundColour);
+	} 
+	else if (player1 < player2) {
+		printTextX2("Player 2", 15, 80, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Wins!", 37, 100, RGBToWord(0, 255, 0), backgroundColour);	
+	}
+	else {
+		printTextX2("Its a", 30, 80, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Draw!", 37, 100, RGBToWord(0, 255, 0), backgroundColour);	
+	}
+
+	delay(2000);
+	startMenu();
 }
