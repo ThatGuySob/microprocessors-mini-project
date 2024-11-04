@@ -371,6 +371,8 @@ void multiplayer() {
 	runGame();
 	player2 = score;
 
+	fillRectangle(0,0,128,160,backgroundColour);
+
 	if (player1 > player2) {
 		printTextX2("Player 1", 15, 80, RGBToWord(0, 255, 0), backgroundColour);
 		printTextX2("Wins!", 37, 100, RGBToWord(0, 255, 0), backgroundColour);
