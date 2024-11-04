@@ -196,7 +196,8 @@ void runGame()
 		if(collisionCheck()){
 			fillRectangle(0,0,128,160, 0x0);  // black out the screen
 			printTextX2("Game Over",10,20,RGBToWord(255,0,0),0);
-			printText("Press Left to Reset",0,40,RGBToWord(255,0,0),0);
+			printText("Press Left",30,40,RGBToWord(255,0,0),0);
+			printText("to Reset",37,60,RGBToWord(255,0,0),0);
 		
 			break;
 		}
