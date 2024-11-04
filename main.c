@@ -30,6 +30,7 @@ void updateDinoPos();
 void updateObstaclePos();
 int collisionCheck();
 void startMenu();
+void multiplayer();
 
 
 volatile uint32_t milliseconds;
@@ -94,8 +95,12 @@ int main()
 //start menu function that displays the text
 void startMenu(){
 	fillRectangle(0,0,128,160,backgroundColour);
-	printTextX2("Kirby Jump", 10,20,RGBToWord(255,255,255),0x8abc);
-	printText("Press Left to start",5,60,RGBToWord(255,255,255),0x8abc);
+	printTextX2("Kirby Jump", 6,20,RGBToWord(255,255,255),0x8abc);
+	printText("Press Left",30,50,RGBToWord(255,255,255),0x8abc);
+	printText("to Start",37,60,RGBToWord(255,255,255),0x8abc);
+
+	printText("Press Right",30,90,RGBToWord(255,255,255),0x8abc);
+	printText("for Multiplayer",15,100,RGBToWord(255,255,255),0x8abc);
 }
 
 void resetGame(void)
@@ -331,4 +336,16 @@ int collisionCheck(){
 void makeBackground() {
 	fillRectangle(0,0,128, 110, backgroundColour);  // black out the screen
 	fillRectangle(0,110,128, 50, bottomColour);  // black out the screen
+}
+
+void multiplayer() {
+	fillRectangle(0,0,128,160,backgroundColour);
+	printTextX2("Player 1", 6,20,RGBToWord(255,255,255),0x8abc);
+	delay(10000);
+	runGame();
+
+	fillRectangle(0,0,128,160,backgroundColour);
+	printTextX2("Player 2", 6,20,RGBToWord(255,255,255),0x8abc);
+	delay(10000);
+	runGame();
 }
