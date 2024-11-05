@@ -12,29 +12,35 @@ void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
 void makeBackground();
 
 
-//game variables
-int dino_y = 90;
-int jump_velocity = 0;
-int is_jumping = 0;
-int gravity = 1;
-int jumpUp = -11;
-float obstacle_x = 100;
-int score = 0;
-int gameover = 0;
-const uint16_t backgroundColour = 0x8ABC;
-const uint16_t bottomColour = 0x3506;
-int highScore = 0;
-
-
+/*------------------
+	game variables
+-------------------*/
+// function signatures for game mechanics
 void updateDinoPos();
 void updateObstaclePos();
 int collisionCheck();
 void startMenu();
 void multiplayer();
+// game mechanics
+int jump_velocity = 0;
+int is_jumping = 0;
+int gravity = 1;
+int jumpUp = -11; // how far the dino jumps (strength)
+// characters positions 
+float star_x = 100;
+float star_y = 94; 
+float gordo_x = 100;
+float dino_y = 90;
 
-
+// game over 
+int score = 0;
+int gameover = 0;
+int highScore = 0;
+const uint16_t backgroundColour = 0x8ABC;
+const uint16_t bottomColour = 0x3506;
 volatile uint32_t milliseconds;
 
+// game sprites
 const uint16_t run1[]= 
 {
 35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,0,0,7042,7042,64676,64676,64676,7042,7042,0,0,35516,35516,35516,35516,35516,35516,35516,35516,0,7042,7042,64676,64676,64676,64676,64676,64676,64676,7042,7042,0,35516,35516,35516,35516,35516,35516,0,7042,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,7042,0,35516,35516,35516,35516,35516,58136,7042,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,7042,0,35516,35516,35516,35516,0,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,0,64676,64676,0,35516,35516,35516,0,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,0,64676,64676,0,35516,35516,35516,0,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,0,64676,64676,0,35516,35516,35516,0,64676,64676,64676,64676,64676,7042,0,64676,64676,64676,64676,64676,0,64676,64676,0,35516,35516,35516,0,64676,64676,64676,64676,64676,64676,64676,0,64676,7042,7042,64676,64676,64676,64676,0,35516,35516,35516,0,7042,64676,64676,64676,64676,64676,64676,0,64676,64676,64676,64676,64676,64676,64676,0,35516,35516,35516,0,7042,64676,64676,64676,64676,64676,0,64676,64676,64676,64676,64676,0,64676,64676,0,35516,35516,35516,0,0,7042,7042,64676,64676,64676,0,64676,64676,64676,64676,64676,64676,64676,7042,0,35516,35516,0,0,0,0,0,0,0,0,64676,64676,64676,64676,64676,64676,64676,64676,7042,0,35516,35516,0,2568,2568,0,0,7042,64676,64676,64676,64676,64676,64676,64676,64676,64676,7042,0,35516,35516,35516,0,11536,11536,2568,2568,0,7042,64676,64676,64676,64676,64676,64676,64676,7042,0,0,0,35516,35516,0,11536,11536,11536,2568,0,7042,7042,64676,64676,64676,64676,7042,7042,0,2568,2568,11536,0,35516,0,11536,11536,11536,11536,0,0,0,0,0,0,0,0,0,2568,11536,11536,11536,0,35516,35516,0,0,0,0,35516,35516,35516,35516,35516,35516,0,2568,2568,11536,11536,11536,11536,0,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,35516,35516,
@@ -79,6 +85,8 @@ const uint16_t sun[]=
 {
 35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,57159,57159,35516,35516,35516,35516,35516,35516,65383,57159,24327,24327,57159,65383,35516,35516,35516,35516,24327,57159,24327,24327,48951,24327,35516,35516,35516,65383,24327,48951,24327,24327,24327,24327,65383,35516,35516,40743,24327,32535,24327,24327,24327,24327,40743,35516,35516,35516,24327,57159,24327,24327,32535,24327,35516,35516,35516,35516,32535,24327,32519,24327,57159,40743,35516,35516,35516,35516,35516,35516,57159,57159,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516
 };
+
+// main function
 int main()
 {
 	initClock();
@@ -86,9 +94,8 @@ int main()
 	setupIO();
 	putImage(20,dino_y,16,16,run1,0,0);
 	displayScore(score, highScore);
-	startMenu(); //function that displays the start menu at the beginning
-	//makeBackground();
-
+	startMenu(); //displays a start menu at the start
+	
     while (1)
     {
 		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
@@ -111,7 +118,7 @@ int main()
 	return 0;
 }
 
-//start menu function that displays the text
+//start menu that prompts the players
 void startMenu(){
 	fillRectangle(0,0,128,160,backgroundColour);
 	printTextX2("Kirby Jump", 6,20,RGBToWord(255,255,255),0x8abc);
@@ -125,19 +132,19 @@ void startMenu(){
 void resetGame(void)
 {
     // Reset game variables and state
-    score = 0;                  // Reset score
-    dino_y = 90;                // Reset Dino position
-    is_jumping = 0;            // Reset jump state
-    jump_velocity = 0;         // Reset jump velocity
-    obstacle_x = 100;          // Reset obstacle position
-    displayScore(score, highScore);       // Display initial score
+    score = 0; // Reset score
+    dino_y = 90; // Reset Dino position
+    is_jumping = 0; // Reset jump state
+    jump_velocity = 0; // Reset jump velocity
+    star_x = 100;// Resets the star's position
+    displayScore(score, highScore); // Display initial score
 	makeBackground();
 }
 
 void runGame()
 {
 	uint32_t scoreUpdate = 0;
-	int frame_counter = 0;            // To track which animation frame to display
+	int frame_counter = 0; // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was update
 
 	while (1)
@@ -147,6 +154,7 @@ void runGame()
 			is_jumping = 1;
 			jump_velocity = jumpUp; // jump starts velocity
 		}
+
 		putImage(5, 5, 10, 10, sun, 0, 0);
 		updateDinoPos();
 		updateObstaclePos();
@@ -158,7 +166,7 @@ void runGame()
 			last_frame_time = milliseconds;
 		}
 
-		// Clear the previous Dino position
+		// Clear the previous Dino jumping position
 		if (dino_y < 90	)
 		{
 			fillRectangle(20, dino_y + 11, 20, 20, backgroundColour);
@@ -168,6 +176,7 @@ void runGame()
 		{
 			fillRectangle(20, dino_y - 11, 20, 20, backgroundColour);
 		}
+
 		// Display the correct animation based on jumping and falling state
 		if (is_jumping && jump_velocity > 0) 
 		{ // Jumping up: show animation frames
@@ -190,16 +199,17 @@ void runGame()
 		}
 
 		// Clear previous position and display current frame for obstacle
-		fillRectangle(obstacle_x, 86, 24, 24, backgroundColour);
+		fillRectangle(star_x, 86, 24, 24, backgroundColour);
 
 		switch (frame_counter) 
 		{
-			case 0: putImage(obstacle_x, 90, 20, 20, star1, 0, 0); break;
-			case 1: putImage(obstacle_x, 90, 20, 20, star2, 0, 0); break;
-			case 2: putImage(obstacle_x, 90, 20, 20, star3, 0, 0); break;
-			case 3: putImage(obstacle_x, 90, 20, 20, star4, 0, 0); break;
+			case 0: putImage(star_x, 90, 20, 20, star1, 0, 0); break;
+			case 1: putImage(star_x, 90, 20, 20, star2, 0, 0); break;
+			case 2: putImage(star_x, 90, 20, 20, star3, 0, 0); break;
+			case 3: putImage(star_x, 90, 20, 20, star4, 0, 0); break;
 		}
 
+		// tracks the player's score and updates it accordingly
 		if ((milliseconds - scoreUpdate) >= 200) 
 		{
 			score++;
@@ -211,8 +221,10 @@ void runGame()
 			scoreUpdate = milliseconds;
 		}
 
+		// checks whether dino has collided with an obstacle.
+		// if yes, then the game stops and game over displays
 		if(collisionCheck()){
-			fillRectangle(0,0,128,160, 0x0);  // black out the screen
+			fillRectangle(0,0,128,160, 0x0); // black out the screen
 			printTextX2("Game Over",10,60,RGBToWord(255,0,0),0);
 		
 			break;
@@ -221,6 +233,101 @@ void runGame()
 		delay(50); // Maintain overall game speed
 	}
 }
+
+void updateDinoPos(){
+    if(is_jumping){ 
+        dino_y += jump_velocity; // Applies the velocity to dino's Y position
+        jump_velocity += gravity; // Gravity slows the upward movement
+
+        // Check if dino hits the ground
+        if(dino_y >= 90){
+            dino_y = 90; // Reset to ground level
+            jump_velocity = 0;// Reset jump velocity
+            is_jumping = 0; // End the jump
+        }
+    }
+
+}
+
+void updateObstaclePos(){
+	star_x -= 2; //moves stars left
+	if(star_x < -19)// moves the star offscreen
+	{
+		star_x = 108;// takes it back the right side of the screen
+		score++;
+	}
+}
+
+int collisionCheck(){
+    // Check for overlap in both x and y coordinates
+    if ((20 < star_x + 20) && (20 + 20 > star_x) && //20 = x-coordinate of dino
+        (dino_y < star_y + 20) && (dino_y + 20 > star_y)) {
+        return 1; // Collision detected
+    }
+
+    return 0; // No collision
+}
+
+void makeBackground() {
+	fillRectangle(0,0,128, 110, backgroundColour);  // black out the screen
+	fillRectangle(0,110,128, 50, bottomColour);  // black out the screen
+}
+
+void multiplayer() {
+	int player1;
+	int player2;
+    char player1Text[10];
+    char player2Text[10];
+
+
+	// Player 1's Run Through
+	fillRectangle(0,0,128,160,backgroundColour);
+	printTextX2("Player 1", 6,20,RGBToWord(255,255,255),0x8abc);
+	delay(2000);
+	resetGame();
+	runGame();
+	player1 = score;
+
+	// Player 2's Run Through
+	fillRectangle(0,0,128,160,backgroundColour);
+	printTextX2("Player 2", 6,20,RGBToWord(255,255,255),0x8abc);
+	delay(2000);
+	resetGame();
+	runGame();
+	player2 = score;
+
+	fillRectangle(0,0,128,160,backgroundColour);
+	printText("Player 1 Score:",10,20,RGBToWord(255,255,255),0x8abc);
+    sprintf(player1Text, "%d", player1);
+	printTextX2(player1Text,30,40,RGBToWord(255,255,255),0x8abc);
+	delay(2000);
+
+	printText("Player 2 Score: ",10,80,RGBToWord(255,255,255),0x8abc);
+    sprintf(player2Text, "%d", player2);
+	printTextX2(player2Text,30,100,RGBToWord(255,255,255),0x8abc);
+	delay(2000);
+
+	// checks to see the which player won the game
+	fillRectangle(0,0,128,160,backgroundColour);
+	if (player1 > player2) {
+		printTextX2("Player 1", 15, 60, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Wins!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);
+	} 
+	else if (player1 < player2) {
+		printTextX2("Player 2", 15, 60, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Wins!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);	
+	}
+	else {
+		printTextX2("Its a", 30, 60, RGBToWord(0, 255, 0), backgroundColour);
+		printTextX2("Draw!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);	
+	}
+
+	delay(2000);
+	startMenu();
+}
+
+
+
 void initSysTick(void)
 {
 	SysTick->LOAD = 48000;
@@ -310,100 +417,4 @@ void setupIO()
 	enablePullUp(GPIOB,5);
 	enablePullUp(GPIOA,11);
 	enablePullUp(GPIOA,8);
-}
-
-
-//Dino mech functions 2
-void updateDinoPos(){
-    if(is_jumping){ 
-        dino_y += jump_velocity;   // Apply the velocity to dino's Y position
-        jump_velocity += gravity;  // Gravity slows the upward movement
-
-        // Check if dino hits the ground
-        if(dino_y >= 90){
-            dino_y = 90;           // Reset to ground level
-            jump_velocity = 0;     // Reset jump velocity
-            is_jumping = 0;        // End the jump
-        }
-    }
-
-}
-
-
-void updateObstaclePos(){
-	obstacle_x -= 2; //moves obstacles left
-	if(obstacle_x < -19)
-	{ //generates the obstacle
-		obstacle_x = 108;
-		score++;
-	}
-}
-
-int collisionCheck(){
-    int obstacle_y = 94;      // Fixed Y position of the obstacle
-
-    // Check for overlap in both x and y coordinates
-    if ((20 < obstacle_x + 20) && (20 + 20 > obstacle_x) && //20 = x-coordinate
-        (dino_y < obstacle_y + 20) && (dino_y + 20 > obstacle_y)) {
-        return 1; // Collision detected
-    }
-    return 0; // No collision
-}
-
-void makeBackground() {
-	fillRectangle(0,0,128, 110, backgroundColour);  // black out the screen
-	fillRectangle(0,110,128, 50, bottomColour);  // black out the screen
-}
-
-void multiplayer() {
-	int player1;
-	int player2;
-    char player1Text[10];
-    char player2Text[10];
-
-
-	// Player 1's Run Through
-	fillRectangle(0,0,128,160,backgroundColour);
-	printTextX2("Player 1", 6,20,RGBToWord(255,255,255),0x8abc);
-	delay(2000);
-	resetGame();
-	runGame();
-	player1 = score;
-
-	// Player 2's Run Through
-	fillRectangle(0,0,128,160,backgroundColour);
-	printTextX2("Player 2", 6,20,RGBToWord(255,255,255),0x8abc);
-	delay(2000);
-	resetGame();
-	runGame();
-	player2 = score;
-
-	fillRectangle(0,0,128,160,backgroundColour);
-	printText("Player 1 Score:",10,20,RGBToWord(255,255,255),0x8abc);
-    sprintf(player1Text, "%d", player1);
-	printTextX2(player1Text,30,40,RGBToWord(255,255,255),0x8abc);
-	delay(2000);
-
-	printText("Player 2 Score: ",10,80,RGBToWord(255,255,255),0x8abc);
-    sprintf(player2Text, "%d", player2);
-	printTextX2(player2Text,30,100,RGBToWord(255,255,255),0x8abc);
-	delay(2000);
-
-	// checks to see the which player won the game
-	fillRectangle(0,0,128,160,backgroundColour);
-	if (player1 > player2) {
-		printTextX2("Player 1", 15, 60, RGBToWord(0, 255, 0), backgroundColour);
-		printTextX2("Wins!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);
-	} 
-	else if (player1 < player2) {
-		printTextX2("Player 2", 15, 60, RGBToWord(0, 255, 0), backgroundColour);
-		printTextX2("Wins!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);	
-	}
-	else {
-		printTextX2("Its a", 30, 60, RGBToWord(0, 255, 0), backgroundColour);
-		printTextX2("Draw!", 37, 80, RGBToWord(0, 255, 0), backgroundColour);	
-	}
-
-	delay(2000);
-	startMenu();
 }
