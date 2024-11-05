@@ -18,7 +18,7 @@ int jump_velocity = 0;
 int is_jumping = 0;
 int gravity = 1;
 int jumpUp = -11;
-int obstacle_x = 100;
+float obstacle_x = 100;
 int score = 0;
 int gameover = 0;
 const uint16_t backgroundColour = 0x8ABC;
@@ -332,7 +332,7 @@ void updateDinoPos(){
 
 void updateObstaclePos(){
 	obstacle_x -= 2; //moves obstacles left
-	if(obstacle_x < -15.5)
+	if(obstacle_x < -20)
 	{ //generates the obstacle
 		obstacle_x = 108;
 		score++;
