@@ -34,6 +34,7 @@ float obstacle_air = 74;
 float obstacle_ground = 94;
 float gordo_x = 100;
 float dino_y = 90;
+float dino_x = 19;
 
 // game over 
 int score = 0;
@@ -305,8 +306,8 @@ void updateObstaclePos(int speed, int random)
 
 int collisionCheck(){
     // Check for overlap in both x and y coordinates
-    if ((19 < star_x + 19) && (19 + 19 > star_x) && //20 = x-coordinate of dino
-        (dino_y < obstacle_air + 19) && (dino_y + 19 > obstacle_air)) {
+    if ((dino_x < star_x + 19) && (dino_x + 19 > star_x) &&
+        (dino_y < star_y + 19) && (dino_y + 19 > star_y)) {
         return 1; // Collision detected
     }
 
