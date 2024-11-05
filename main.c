@@ -332,7 +332,7 @@ void updateDinoPos(){
 
 void updateObstaclePos(){
 	obstacle_x -= 2; //moves obstacles left
-	if(obstacle_x < -20)
+	if(obstacle_x < -19)
 	{ //generates the obstacle
 		obstacle_x = 108;
 		score++;
