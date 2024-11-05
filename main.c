@@ -17,7 +17,7 @@ void makeBackground();
 -------------------*/
 // function signatures for game mechanics
 void updateDinoPos();
-void updateObstaclePos();
+void updateObstaclePos(int speed);
 int collisionCheck();
 void startMenu();
 void multiplayer();
@@ -146,6 +146,8 @@ void runGame()
 	uint32_t scoreUpdate = 0;
 	int frame_counter = 0; // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was update
+	int speed = 1;
+	uint32_t speedTime = milliseconds;
 
 	while (1)
 	{
@@ -157,7 +159,12 @@ void runGame()
 
 		putImage(5, 5, 10, 10, sun, 0, 0);
 		updateDinoPos();
-		updateObstaclePos();
+		updateObstaclePos(speed);
+
+		if ((milliseconds - speedTime) >= 50000) {
+			speed++;
+			speedTime = milliseconds;
+		}
 
 		// Only update the frame every 100 ms (adjust for preferred frame rate)
 		if (milliseconds - last_frame_time >= 100) 
@@ -250,7 +257,7 @@ void updateDinoPos(){
 }
 
 void updateObstaclePos(){
-	star_x -= 2; //moves stars left
+	star_x -= 2 * speed; //moves stars left
 	if(star_x < -19)// moves the star offscreen
 	{
 		star_x = 108;// takes it back the right side of the screen
