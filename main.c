@@ -260,11 +260,11 @@ void updateDinoPos(){
 
 }
 
-void updateObstaclePos(){
+void updateObstaclePos(int speed){
 	star_x -= 2 * speed; //moves stars left
 	if(star_x < -19)// moves the star offscreen
 	{
-		putImage(obstacle_x, 88, 22, 22, back, 0, 0);
+		putImage(star_x, 88, 22, 22, back, 0, 0);
 		star_x = 108;// takes it back the right side of the screen
 		score++;
 	}
