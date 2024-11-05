@@ -30,6 +30,7 @@ int gravity = 1;
 int jumpUp = -11; // how far the dino jumps (strength)
 // characters positions 
 float star_x = 100;
+float star_y = 94;
 float obstacle_air = 74; 
 float obstacle_ground = 94;
 float gordo_x = 100;
