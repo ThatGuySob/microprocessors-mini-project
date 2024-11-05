@@ -1,4 +1,5 @@
 #include <stm32f031x6.h>
+#include <stdlib.h>
 #include "display.h"
 
 void initClock(void);
@@ -12,12 +13,13 @@ void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
 void makeBackground();
 
 
+
 /*------------------
 	game variables
 -------------------*/
 // function signatures for game mechanics
 void updateDinoPos();
-void updateObstaclePos(int speed);
+void updateObstaclePos(int speed, int random);
 int collisionCheck();
 void startMenu();
 void multiplayer();
@@ -28,7 +30,8 @@ int gravity = 1;
 int jumpUp = -11; // how far the dino jumps (strength)
 // characters positions 
 float star_x = 100;
-float star_y = 94; 
+float obstacle_air = 74; 
+float obstacle_ground = 94;
 float gordo_x = 100;
 float dino_y = 90;
 
@@ -75,11 +78,11 @@ const uint16_t fall[]=
 };
 const uint16_t gordo1[]= 
 {
-0,0,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,35516,35516,35516,0,35516,0,0,35516,35516,0,46509,0,35516,35516,35516,35516,35516,35516,35516,35516,0,35516,46509,0,35516,0,35516,0,35516,35516,35516,0,0,35516,35516,35516,0,46509,35516,35516,0,0,0,0,0,0,0,35516,0,35516,35516,35516,35516,0,35516,0,0,0,0,0,0,0,46509,0,35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,35516,0,0,35516,35516,0,0,35516,35516,0,0,0,0,35516,35516,0,0,0,35516,35516,0,35516,35516,0,35516,35516,0,35516,46509,0,0,46509,35516,0,35516,35516,0,35516,35516,0,35516,35516,0,0,0,35516,35516,0,0,0,0,35516,35516,0,0,35516,35516,0,0,35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,35516,0,46509,0,0,0,0,0,0,0,35516,0,35516,35516,35516,35516,0,35516,0,0,0,0,0,0,0,35516,35516,46509,0,35516,35516,35516,0,0,35516,35516,35516,0,35516,0,35516,0,46509,35516,0,35516,35516,35516,35516,35516,35516,35516,35516,0,46509,0,35516,35516,0,0,35516,0,35516,35516,35516,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,0,0,
+0,0,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,35516,35516,35516,0,16119,0,0,35516,35516,0,46509,0,35516,35516,35516,35516,35516,35516,35516,35516,0,16119,46509,0,35516,0,16119,0,35516,35516,35516,0,0,35516,35516,35516,0,46509,16119,16119,0,0,0,0,0,0,0,16119,0,35516,35516,35516,35516,0,16119,0,0,0,0,0,0,0,46509,0,35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,35516,0,0,16119,16119,0,0,16119,16119,0,0,0,0,35516,35516,0,0,0,16119,16119,0,16119,16119,0,16119,16119,0,16119,46509,0,0,46509,16119,0,16119,16119,0,16119,16119,0,16119,16119,0,0,0,35516,35516,0,0,0,0,16119,16119,0,0,16119,16119,0,0,35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,35516,0,46509,0,0,0,0,0,0,0,16119,0,35516,35516,35516,35516,0,16119,0,0,0,0,0,0,0,16119,16119,46509,0,35516,35516,35516,0,0,35516,35516,35516,0,16119,0,35516,0,46509,16119,0,35516,35516,35516,35516,35516,35516,35516,35516,0,46509,0,35516,35516,0,0,16119,0,35516,35516,35516,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,0,0,
 };
 const uint16_t gordo2[]= 
 {
-35516,35516,35516,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,0,0,35516,35516,35516,35516,35516,35516,35516,0,46509,0,35516,35516,0,0,35516,0,35516,35516,0,0,35516,35516,35516,0,35516,0,35516,0,46509,35516,0,35516,35516,35516,0,35516,0,0,0,0,0,0,0,35516,35516,46509,0,35516,35516,35516,35516,0,46509,0,0,0,0,0,0,0,35516,0,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,0,0,0,0,35516,35516,0,0,35516,35516,0,0,35516,35516,35516,0,46509,35516,0,35516,35516,0,35516,35516,0,35516,35516,0,0,0,35516,35516,0,0,0,35516,35516,0,35516,35516,0,35516,35516,0,35516,46509,0,35516,35516,35516,0,0,35516,35516,0,0,35516,35516,0,0,0,0,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,0,35516,0,0,0,0,0,0,0,46509,0,35516,35516,35516,35516,0,46509,35516,35516,0,0,0,0,0,0,0,35516,0,35516,35516,35516,0,35516,46509,0,35516,0,35516,0,35516,35516,35516,0,0,35516,35516,0,35516,0,0,35516,35516,0,46509,0,35516,35516,35516,35516,35516,35516,35516,0,0,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,35516,35516,35516,
+35516,35516,35516,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,0,0,35516,35516,35516,35516,35516,35516,35516,0,46509,0,35516,35516,0,0,16119,0,35516,35516,0,0,35516,35516,35516,0,16119,0,35516,0,46509,16119,0,35516,35516,35516,0,16119,0,0,0,0,0,0,0,16119,16119,46509,0,35516,35516,35516,35516,0,46509,0,0,0,0,0,0,0,16119,0,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,0,0,0,0,16119,16119,0,0,16119,16119,0,0,35516,35516,35516,0,46509,16119,0,16119,16119,0,16119,16119,0,16119,16119,0,0,0,35516,35516,0,0,0,16119,16119,0,16119,16119,0,16119,16119,0,16119,46509,0,35516,35516,35516,0,0,16119,16119,0,0,16119,16119,0,0,0,0,35516,35516,35516,35516,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,0,16119,0,0,0,0,0,0,0,46509,0,35516,35516,35516,35516,0,46509,16119,16119,0,0,0,0,0,0,0,16119,0,35516,35516,35516,0,16119,46509,0,35516,0,16119,0,35516,35516,35516,0,0,35516,35516,0,16119,0,0,35516,35516,0,46509,0,35516,35516,35516,35516,35516,35516,35516,0,0,35516,35516,35516,35516,35516,0,35516,35516,35516,35516,35516,35516,35516,35516,
 };
 const uint16_t sun[]=
 {
@@ -96,7 +99,6 @@ int main()
 	initClock();
 	initSysTick();
 	setupIO();
-	putImage(20,dino_y,16,16,run1,0,0);
 	displayScore(score, highScore);
 	startMenu(); //displays a start menu at the start
 	
@@ -140,7 +142,8 @@ void resetGame(void)
     dino_y = 90; // Reset Dino position
     is_jumping = 0; // Reset jump state
     jump_velocity = 0; // Reset jump velocity
-    star_x = 100;// Resets the star's position
+    star_x = obstacle_air;// Resets the star's position
+	gordo_x = obstacle_ground;
     displayScore(score, highScore); // Display initial score
 	makeBackground();
 }
@@ -152,6 +155,7 @@ void runGame()
 	unsigned int last_frame_time = 0; // Time when last frame was update
 	int speed = 1;
 	uint32_t speedTime = milliseconds;
+	int random = (rand() % 2) + 1;
 
 	while (1)
 	{
@@ -163,7 +167,7 @@ void runGame()
 
 		putImage(5, 5, 10, 10, sun, 0, 0);
 		updateDinoPos();
-		updateObstaclePos(speed);
+		updateObstaclePos(speed, random);
 
 		if ((milliseconds - speedTime) >= 50000) {
 			speed++;
@@ -209,15 +213,29 @@ void runGame()
 			}
 		}
 
-		// Clear previous position and display current frame for obstacle
-		fillRectangle(star_x, 86, 24, 24, backgroundColour);
+		if (random == 1)
+		{	// Clear previous position and display current frame for obstacle
+			fillRectangle(star_x, obstacle_air, 24, 24, backgroundColour);
 
-		switch (frame_counter) 
+			switch (frame_counter) 
+			{
+				case 0: putImage(star_x, obstacle_air, 20, 20, star1, 0, 0); break;
+				case 1: putImage(star_x, obstacle_air, 20, 20, star2, 0, 0); break;
+				case 2: putImage(star_x, obstacle_air, 20, 20, star3, 0, 0); break;
+				case 3: putImage(star_x, obstacle_air, 20, 20, star4, 0, 0); break;
+			}
+		}
+		else if(random == 2)
 		{
-			case 0: putImage(star_x, 90, 20, 20, star1, 0, 0); break;
-			case 1: putImage(star_x, 90, 20, 20, star2, 0, 0); break;
-			case 2: putImage(star_x, 90, 20, 20, star3, 0, 0); break;
-			case 3: putImage(star_x, 90, 20, 20, star4, 0, 0); break;
+			fillRectangle(gordo_x+5, obstacle_ground, 16, 16, backgroundColour);
+
+			switch (frame_counter) 
+			{
+				case 0: putImage(gordo_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
+				case 1: putImage(gordo_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
+				case 2: putImage(gordo_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
+				case 3: putImage(gordo_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
+			}
 		}
 
 		// tracks the player's score and updates it accordingly
@@ -260,23 +278,42 @@ void updateDinoPos(){
 
 }
 
-void updateObstaclePos(int speed){
-	star_x -= 2 * speed; //moves stars left
-	if(star_x < -19)// moves the star offscreen
+void updateObstaclePos(int speed, int random)
+{
+	if(random == 1)
 	{
-		putImage(star_x, 88, 22, 22, back, 0, 0);
-		star_x = 108;// takes it back the right side of the screen
-		score++;
+		star_x -= 2 * speed; //moves stars left
+		if(star_x < -19)// moves the star offscreen
+		{
+			putImage(star_x, 88, 22, 22, back, 0, 0);
+			star_x = 108;// takes it back the right side of the screen
+			score++;
+		}
 	}
+	if(random == 2)
+	{
+		gordo_x -= 2 * speed;
+		if(gordo_x < -10)// moves the star offscreen
+		{
+			putImage(gordo_x, 88, 22, 22, back, 0, 0);
+			gordo_x = 108;// takes it back the right side of the screen
+			score++;
+		}
+	}
+
 }
 
 int collisionCheck(){
     // Check for overlap in both x and y coordinates
-    if ((20 < star_x + 20) && (20 + 20 > star_x) && //20 = x-coordinate of dino
-        (dino_y < star_y + 20) && (dino_y + 20 > star_y)) {
+    if ((19 < star_x + 19) && (19 + 19 > star_x) && //20 = x-coordinate of dino
+        (dino_y < obstacle_air + 19) && (dino_y + 19 > obstacle_air)) {
         return 1; // Collision detected
     }
 
+	if ((15 < gordo_x + 15) && (15 + 15 > gordo_x) && //16 = x-coordinate of dino
+    	(dino_y < obstacle_ground + 15) && (dino_y + 15 > obstacle_ground)) {
+        return 1; // Collision detected
+    }
     return 0; // No collision
 }
 
