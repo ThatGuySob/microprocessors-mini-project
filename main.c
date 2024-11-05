@@ -146,8 +146,8 @@ void resetGame(void)
     dino_y = 90; // Reset Dino position
     is_jumping = 0; // Reset jump state
     jump_velocity = 0; // Reset jump velocity
-    star_x = 120;// Resets the star's position
-	gordo_x = 120;
+    star_x = 118;// Resets the star's position
+	gordo_x = 112;
     displayScore(score, highScore); // Display initial score
 	makeBackground();
 }
@@ -171,7 +171,7 @@ void runGame()
 
 		putImage(5, 5, 10, 10, sun, 0, 0);
 		updateDinoPos();
-		random = updateObstaclePos(speed, random);
+		updateObstaclePos(speed, random);
 
 		
 
@@ -292,7 +292,7 @@ int updateObstaclePos(int speed, int random)
 		if(star_x < -19)// moves the star offscreen
 		{
 			putImage(star_x, 88, 22, 22, back, 0, 0);
-			star_x = 128;// takes it back the right side of the screen
+			star_x = 108;// takes it back the right side of the screen
 			score++;
 			random = ((rand() % 2) + 1);
 		}
@@ -303,7 +303,7 @@ int updateObstaclePos(int speed, int random)
 		if(gordo_x < -10)// moves the star offscreen
 		{
 			putImage(gordo_x, 88, 22, 22, back, 0, 0);
-			gordo_x = 124;// takes it back the right side of the screen
+			gordo_x = 108;// takes it back the right side of the screen
 			score++;
 			random = ((rand() % 2) + 1);
 		}
