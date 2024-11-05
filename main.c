@@ -19,7 +19,7 @@ void makeBackground();
 -------------------*/
 // function signatures for game mechanics
 void updateDinoPos();
-void updateObstaclePos(int speed, int random);
+int updateObstaclePos(int speed, int random);
 int collisionCheck();
 void startMenu();
 void multiplayer();
@@ -29,12 +29,15 @@ int is_jumping = 0;
 int gravity = 1;
 int jumpUp = -11; // how far the dino jumps (strength)
 // characters positions 
-int star_x = 100;
-int star_y = 94;
-int obstacle_air = 74; 
-int obstacle_ground = 94;
-int gordo_x = 100;
-int dino_y = 90;
+float star_x = 100;
+float obstacle_air = 74; 
+float obstacle_ground = 94;
+float gordo_x = 100;
+float dino_y = 90;
+float dino_x = 20;
+float dino_size = 20;
+float star_size = 20;
+int gordo_size = 16;
 
 // game over 
 int score = 0;
@@ -143,8 +146,8 @@ void resetGame(void)
     dino_y = 90; // Reset Dino position
     is_jumping = 0; // Reset jump state
     jump_velocity = 0; // Reset jump velocity
-    star_x = obstacle_air;// Resets the star's position
-	gordo_x = obstacle_ground;
+    star_x = 120;// Resets the star's position
+	gordo_x = 120;
     displayScore(score, highScore); // Display initial score
 	makeBackground();
 }
@@ -168,7 +171,9 @@ void runGame()
 
 		putImage(5, 5, 10, 10, sun, 0, 0);
 		updateDinoPos();
-		updateObstaclePos(speed, random);
+		random = updateObstaclePos(speed, random);
+
+		
 
 		if ((milliseconds - speedTime) >= 50000) {
 			speed++;
@@ -279,7 +284,7 @@ void updateDinoPos(){
 
 }
 
-void updateObstaclePos(int speed, int random)
+int updateObstaclePos(int speed, int random)
 {
 	if(random == 1)
 	{
@@ -287,8 +292,9 @@ void updateObstaclePos(int speed, int random)
 		if(star_x < -19)// moves the star offscreen
 		{
 			putImage(star_x, 88, 22, 22, back, 0, 0);
-			star_x = 108;// takes it back the right side of the screen
+			star_x = 128;// takes it back the right side of the screen
 			score++;
+			random = ((rand() % 2) + 1);
 		}
 	}
 	if(random == 2)
@@ -297,22 +303,23 @@ void updateObstaclePos(int speed, int random)
 		if(gordo_x < -10)// moves the star offscreen
 		{
 			putImage(gordo_x, 88, 22, 22, back, 0, 0);
-			gordo_x = 108;// takes it back the right side of the screen
+			gordo_x = 124;// takes it back the right side of the screen
 			score++;
+			random = ((rand() % 2) + 1);
 		}
 	}
+	return random;
 
 }
 
 int collisionCheck(){
     // Check for overlap in both x and y coordinates
-    if ((19 < star_x + 19) && (19 + 19 > star_x) &&
-        (dino_y < star_y + 19) && (dino_y + 19 > star_y)) {
+    if ((dino_x < star_x + star_size) && (dino_x + dino_size > star_x) && (dino_y < obstacle_air + star_size) && (dino_y + dino_size > obstacle_air)) 
+	{
         return 1; // Collision detected
     }
-
-	if ((15 < gordo_x + 15) && (15 + 15 > gordo_x) && //16 = x-coordinate of dino
-    	(dino_y < obstacle_ground + 15) && (dino_y + 15 > obstacle_ground)) {
+	else if ((dino_x < gordo_x + gordo_size) && (dino_x + dino_size > gordo_x) && (dino_y < obstacle_ground + gordo_size) && (dino_y + dino_size > obstacle_ground)) 
+	{
         return 1; // Collision detected
     }
     return 0; // No collision
