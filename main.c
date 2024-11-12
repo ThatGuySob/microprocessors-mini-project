@@ -130,6 +130,7 @@ int main()
 	displayScore(score, highScore);
 	startMenu(); //displays a start menu at the start
 
+
     while (1)
     {
 		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
@@ -161,6 +162,7 @@ void startMenu(){
 
 	printText("Press Right",30,90,RGBToWord(255,255,255),0x8abc);
 	printText("for Multiplayer",15,100,RGBToWord(255,255,255),0x8abc);
+	GPIOA->ODR &= ~(1 << 0);
 }
 
 void resetGame(void)
@@ -174,6 +176,7 @@ void resetGame(void)
 	obstacle_ground_x = 112;
     displayScore(score, highScore); // Display initial score
 	makeBackground();
+
 }
 
 void runGame()
@@ -401,10 +404,12 @@ int collisionCheck()
     // Check for overlap in both x and y coordinates
     if (((dino_x < star_x + star_size) && (dino_x + dino_size > star_x) && (dino_y < obstacle_air + star_size) && (dino_y + dino_size > obstacle_air)) && !duck) 
 	{
+		GPIOA->ODR |= (1 << 0); // Turn on red LED
         return 1; // Collision detected
     }
 	else if ((dino_x < obstacle_ground_x + gordo_size) && (dino_x + dino_size > obstacle_ground_x) && (dino_y < obstacle_ground + gordo_size) && (dino_y + dino_size > obstacle_ground)) 
 	{
+		GPIOA->ODR |= (1 << 0); // Turn on red LED
         return 1; // Collision detected
     }
     return 0; // No collision
@@ -429,7 +434,8 @@ void multiplayer() {
 	resetGame();
 	runGame();
 	player1 = score;
-
+	GPIOA->ODR &= ~(1 << 0);
+	
 	// Player 2's Run Through
 	fillRectangle(0,0,128,160,backgroundColour);
 	printTextX2("Player 2", 6,20,RGBToWord(255,255,255),0x8abc);
@@ -555,10 +561,12 @@ void setupIO()
 	pinMode(GPIOB,5,0);
 	pinMode(GPIOA,8,0);
 	pinMode(GPIOA,11,0);
+	pinMode(GPIOA,0,1); // for red led
 	enablePullUp(GPIOB,4);
 	enablePullUp(GPIOB,5);
 	enablePullUp(GPIOA,11);
 	enablePullUp(GPIOA,8);
+	enablePullUp(GPIOA,0);
 
     // Enable clocks for GPIOA and USART1
     RCC->AHBENR |= (1 << 17); // GPIOA clock
