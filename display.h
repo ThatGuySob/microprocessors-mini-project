@@ -1,3 +1,9 @@
+#include <stdint.h>
+
+void initSerial(void);
+void eputchar(char c);
+char egetchar(void);
+void eputs(char *String);
 void display_begin(void);
 void delay(uint32_t dly);
 void fillRectangle(uint16_t x,uint16_t y,uint16_t width, uint16_t height, uint16_t colour);
@@ -12,4 +18,3 @@ void printTextX2(const char *Text, uint16_t x, uint16_t y, uint16_t ForeColour, 
 void printNumber(uint16_t Number, uint16_t x, uint16_t y, uint16_t ForeColour, uint16_t BackColour);
 void printNumberX2(uint16_t Number, uint16_t x, uint16_t y, uint16_t ForeColour, uint16_t BackColour);
 uint16_t RGBToWord(uint16_t R, uint16_t G, uint16_t B);
-void displayScore(int score);
