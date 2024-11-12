@@ -11,6 +11,10 @@ int isInside(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t px, uint
 void enablePullUp(GPIO_TypeDef *Port, uint32_t BitNumber);
 void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
 void makeBackground();
+void eputchar(char c);
+char egetchar(void);
+void eputs(char *String); 
+void USART1_sendString(const char *str);
 
 
 /*------------------
@@ -32,7 +36,7 @@ int duck = 0;
 float star_x = 100;
 float obstacle_air = 76; 
 float obstacle_ground = 94;
-float gordo_x = 100;
+float obstacle_ground_x = 100;
 float dino_y = 90;
 float dino_x = 20;
 float dino_size = 20;
@@ -108,6 +112,15 @@ const uint16_t crouch3[]=
 {
 	35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,0,0,35516,35516,35516,35516,35516,35516,35516,35516,35516,0,0,0,7042,64676,64676,64676,64676,64676,7042,7042,0,0,0,35516,35516,35516,35516,0,0,7042,64676,7042,7042,64676,64676,64676,64676,64676,64676,64676,64676,7042,7042,0,35516,35516,0,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,7042,0,35516,0,7042,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,0,64676,0,35516,0,7042,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,64676,0,64676,0,35516,0,7042,7042,64676,64676,64676,64676,64676,64676,64676,64676,7042,0,0,0,64676,0,7042,0,35516,35516,0,0,7042,7042,64676,64676,64676,64676,64676,7042,0,11536,11536,11536,0,7042,7042,0,35516,35516,0,11536,0,0,7042,64676,64676,64676,7042,7042,0,11536,11536,11536,0,0,0,35516,35516,35516,35516,0,11536,0,0,0,0,0,0,0,0,0,0,0,0,0,35516,35516,35516,
 };
+const uint16_t waddle1[]=
+{
+	35516,35516,35516,35516,35516,0,0,0,0,0,35516,35516,35516,35516,35516,35516,35516,35516,35516,0,0,48698,48698,48698,48698,48698,0,0,35516,35516,35516,35516,35516,35516,0,0,0,0,48698,48698,48698,48698,48698,48698,0,35516,35516,35516,35516,0,24470,24470,24470,24470,0,48698,48698,48698,48698,48698,0,0,0,35516,35516,0,24470,0,24470,24470,24470,0,48698,48698,48698,0,48698,48698,48698,0,35516,0,24470,0,24470,24470,24470,0,48698,48698,0,48698,48698,48698,48698,0,0,24470,24470,0,24470,24470,24470,0,48698,48698,48698,48698,48698,48698,48698,0,0,24470,24470,24470,24470,24470,24470,0,48698,48698,48698,48698,48698,48698,48698,0,0,24470,24470,24470,24470,24470,24470,0,48698,48698,48698,48698,48698,48698,0,35516,0,57148,24470,24470,24470,24470,0,48698,48698,48698,48698,48698,0,0,0,35516,35516,0,0,0,0,0,48698,48698,48698,48698,48698,48698,48698,48698,0,35516,35516,0,0,48698,48698,48698,48698,48698,48698,48698,48698,48698,0,0,0,35516,0,24389,24389,0,48698,48698,48698,48698,48698,48698,48698,0,14339,24389,24389,0,0,24389,24389,24389,0,48698,48698,48698,48698,48698,0,24389,24389,24389,24389,0,35516,0,24389,24389,24389,0,0,0,0,0,0,0,24389,24389,24389,0,35516,35516,0,0,0,35516,35516,35516,35516,35516,35516,35516,0,0,0,35516,
+};
+const uint16_t waddle2[]=
+{
+	35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,35516,35516,35516,35516,35516,35516,35516,35516,0,0,48698,48698,48698,48698,48698,48698,0,0,35516,35516,35516,35516,35516,0,0,0,0,0,48698,48698,48698,48698,48698,48698,0,35516,35516,35516,0,24470,24470,24470,24470,57148,0,48698,48698,48698,48698,48698,0,35516,35516,35516,0,0,24470,0,24470,24470,0,48698,48698,48698,48698,48698,48698,0,35516,0,24470,0,24470,0,24470,24470,24470,0,48698,48698,48698,48698,48698,0,35516,0,24470,0,24470,0,24470,24470,24470,0,48698,48698,48698,48698,0,0,35516,0,24470,24470,24470,24470,24470,24470,24470,0,48698,48698,48698,48698,0,0,35516,0,24470,24470,24470,24470,24470,24470,0,48698,0,48698,48698,0,0,0,35516,35516,0,24470,24470,24470,24470,0,0,48698,48698,0,0,48698,48698,0,35516,35516,35516,0,0,0,0,0,48698,48698,48698,48698,48698,48698,0,35516,35516,35516,35516,0,48698,48698,48698,48698,0,0,0,0,48698,0,0,35516,35516,35516,35516,35516,0,48698,48698,0,14339,57148,57148,0,48698,0,35516,35516,35516,35516,35516,35516,35516,0,0,57148,57148,57148,57148,14339,0,35516,35516,35516,35516,35516,35516,35516,35516,35516,0,0,0,0,0,0,35516,35516,35516,35516,35516,
+};
+
 // main function
 int main()
 {
@@ -116,14 +129,10 @@ int main()
 	setupIO();
 	displayScore(score, highScore);
 	startMenu(); //displays a start menu at the start
-	
-	GPIOA->ODR |= (1 << 0); // Turn on red LED
-	delay(1000); // Wait 1 second
-	GPIOA->ODR &= ~(1 << 0); // Turn off red LED	
+
 
     while (1)
     {
-
 		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
 		{		
 			resetGame();  // Reset game state before starting the game
@@ -138,7 +147,6 @@ int main()
 			multiplayer();
 			continue;
 	   	}
-
     }
 	
 	delay(50); // Maintain overall game speed
@@ -154,6 +162,7 @@ void startMenu(){
 
 	printText("Press Right",30,90,RGBToWord(255,255,255),0x8abc);
 	printText("for Multiplayer",15,100,RGBToWord(255,255,255),0x8abc);
+	GPIOA->ODR &= ~(1 << 0);
 }
 
 void resetGame(void)
@@ -164,12 +173,10 @@ void resetGame(void)
     is_jumping = 0; // Reset jump state
     jump_velocity = 0; // Reset jump velocity
     star_x = 108;// Resets the star's position
-	gordo_x = 112;
+	obstacle_ground_x = 112;
     displayScore(score, highScore); // Display initial score
 	makeBackground();
 
-	// Turn off red LED
-    GPIOA->ODR &= ~(1 << 0);
 }
 
 void runGame()
@@ -179,7 +186,11 @@ void runGame()
 	unsigned int last_frame_time = 0; // Time when last frame was update
 	int speed = 1;
 	uint32_t speedTime = milliseconds;
-	int random = (rand() % 2) + 1;
+	int random = (rand() % 3) + 1;
+
+	char gamestart[10];
+	sprintf(gamestart, "\nGame Start!\n", gamestart);
+	eputs(gamestart);
 
 	while (1)
 	{
@@ -268,16 +279,30 @@ void runGame()
 		}
 		else if(random == 2)
 		{
-			fillRectangle(gordo_x+5, obstacle_ground, 16, 16, backgroundColour);
+			fillRectangle(obstacle_ground_x+5, obstacle_ground, 16, 16, backgroundColour);
 
 			switch (frame_counter) 
 			{
-				case 0: putImage(gordo_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
-				case 1: putImage(gordo_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
-				case 2: putImage(gordo_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
-				case 3: putImage(gordo_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
+				case 0: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
+				case 1: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
+				case 2: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
+				case 3: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
 			}
 		}
+
+		else if(random == 3)
+		{
+			fillRectangle(obstacle_ground_x+5, obstacle_ground, 16, 16, backgroundColour);
+
+			switch (frame_counter) 
+			{
+				case 0: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle1, 0, 0); break;
+				case 1: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle1, 0, 0); break;
+				case 2: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle2, 0, 0); break;
+				case 3: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle2, 0, 0); break;
+			}
+		}
+
 
 		// tracks the player's score and updates it accordingly
 		if ((milliseconds - scoreUpdate) >= 200) 
@@ -289,6 +314,10 @@ void runGame()
 			}
 			displayScore(score, highScore);
 			scoreUpdate = milliseconds;
+
+			char scoreString[10];
+			sprintf(scoreString, "Score: %d\n", score);
+			eputs(scoreString);
 		}
 
 		// checks whether dino has collided with an obstacle.
@@ -296,7 +325,9 @@ void runGame()
 		if(collisionCheck()){
 			fillRectangle(0,0,128,160, 0x0); // black out the screen
 			printTextX2("Game Over",10,60,RGBToWord(255,0,0),0);
-		
+			char gameover[10];
+			sprintf(gameover, "\nGame Over!\n", gameover);
+			eputs(gameover);
 			break;
 		}
 
@@ -344,11 +375,22 @@ int updateObstaclePos(int speed, int random)
 	}
 	if(random == 2)
 	{
-		gordo_x -= 2 * speed;
-		if(gordo_x < -10)// moves the star offscreen
+		obstacle_ground_x -= 2 * speed;
+		if(obstacle_ground_x < -10)// moves the star offscreen
 		{
-			fillRectangle(gordo_x, 88, 22, 22, 0x8ABC);
-			gordo_x = 112;// takes it back the right side of the screen
+			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
+			obstacle_ground_x = 112;// takes it back the right side of the screen
+			score++;
+			random = ((rand() % 2) + 1);
+		}
+	}
+	if(random == 3)
+	{
+		obstacle_ground_x -= 2 * speed;
+		if(obstacle_ground_x < -10)// moves the star offscreen
+		{
+			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
+			obstacle_ground_x = 112;// takes it back the right side of the screen
 			score++;
 			random = ((rand() % 2) + 1);
 		}
@@ -357,32 +399,21 @@ int updateObstaclePos(int speed, int random)
 
 }
 
-
 int collisionCheck()
 {
-    // Check collision with star
-    if (((dino_x < star_x + star_size) && 
-         (dino_x + dino_size > star_x) && 
-         (dino_y < obstacle_air + star_size) && 
-         (dino_y + dino_size > obstacle_air)) && 
-         !duck) 
-    {
-        GPIOA->ODR |= (1 << 0); // Turn on red LED
+    // Check for overlap in both x and y coordinates
+    if (((dino_x < star_x + star_size) && (dino_x + dino_size > star_x) && (dino_y < obstacle_air + star_size) && (dino_y + dino_size > obstacle_air)) && !duck) 
+	{
+		GPIOA->ODR |= (1 << 0); // Turn on red LED
         return 1; // Collision detected
     }
-    // Check collision with gordo
-    else if ((dino_x < gordo_x + gordo_size) && 
-             (dino_x + dino_size > gordo_x) && 
-             (dino_y < obstacle_ground + gordo_size) && 
-             (dino_y + dino_size > obstacle_ground)) 
-    {
-        GPIOA->ODR |= (1 << 0); // Turn on red LED
+	else if ((dino_x < obstacle_ground_x + gordo_size) && (dino_x + dino_size > obstacle_ground_x) && (dino_y < obstacle_ground + gordo_size) && (dino_y + dino_size > obstacle_ground)) 
+	{
+		GPIOA->ODR |= (1 << 0); // Turn on red LED
         return 1; // Collision detected
     }
     return 0; // No collision
 }
-
-
 
 void makeBackground() {
 	fillRectangle(0,0,128, 110, backgroundColour);  // black out the screen
@@ -403,7 +434,8 @@ void multiplayer() {
 	resetGame();
 	runGame();
 	player1 = score;
-
+	GPIOA->ODR &= ~(1 << 0);
+	
 	// Player 2's Run Through
 	fillRectangle(0,0,128,160,backgroundColour);
 	printTextX2("Player 2", 6,20,RGBToWord(255,255,255),0x8abc);
@@ -536,7 +568,7 @@ void setupIO()
 	enablePullUp(GPIOA,8);
 	enablePullUp(GPIOA,0);
 
-	// Enable clocks for GPIOA and USART1
+    // Enable clocks for GPIOA and USART1
     RCC->AHBENR |= (1 << 17); // GPIOA clock
     RCC->APB2ENR |= (1 << 14); // USART1 clock
     
@@ -555,7 +587,6 @@ void setupIO()
     USART1->CR1 |= (1 << 3);  // Enable transmitter
     USART1->CR1 |= (1 << 0);  // Enable USART1
 }
-
 void eputchar(char c)
 {
 	while( (USART1->ISR & (1 << 6)) == 0); // wait for any ongoing transmission to finish
