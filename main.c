@@ -340,6 +340,12 @@ void runGame()
 			char scoreString[10];
 			sprintf(scoreString, "Score: %d\n", score);
 			eputs(scoreString);
+
+			if (score % 50 == 0 && score > 0) {
+				playNote(200);
+			} else {
+				playNote(0);
+			}
 		}
 
 		// checks whether dino has collided with an obstacle.
@@ -352,12 +358,6 @@ void runGame()
 			char gameover[10];
 			sprintf(gameover, "\nGame Over!\n", gameover);
 			eputs(gameover);
-
-			if (score % 50 == 0 && score > 0) {
-				playNote(200);
-			} else {
-				playNote(0);
-			}
 			break;
 
 		}
