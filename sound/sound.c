@@ -3,24 +3,29 @@
 void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
 void playNote(uint32_t Freq)
 {	
-	// Counter is running at 65536 Hz 
-	TIM14->ARR = (uint32_t)65536/((uint32_t)Freq); 
-	TIM14->CCR1 = TIM14->ARR/2;	
-	TIM14->CNT = 0; // set the count to zero initially
-	TIM14->CR1 |= (1 << 0); // and enable the counter
+    if (Freq == 0) {
+        TIM14->CR1 &= ~(1 << 0); // Disable counter to stop sound
+        return;
+    }
+
+    TIM14->ARR = (uint32_t)(65536 / Freq); // Set frequency
+    TIM14->CCR1 = TIM14->ARR / 2;          // 50% duty cycle
+    TIM14->CNT = 0;                        // Reset counter
+    TIM14->CR1 |= (1 << 0);                // Enable counter
 }
 void initSound()
 {
-	// Power up the timer module
-	RCC->APB1ENR |= (1 << 8);
-	pinMode(GPIOB,1,2); // Assign a non-GPIO (alternate) function to GPIOB bit 1
-	GPIOB->AFR[0] &= ~(0x0fu << 4); // Assign alternate function 0 to GPIOB 1 (Timer 14 channel 1)
-	TIM14->CR1 = 0; // Set Timer 14 to default values
-	TIM14->CCMR1 = (1 << 6) + (1 << 5);
-	TIM14->CCER |= (1 << 0);
-	TIM14->PSC = 48000000UL/65536UL; // Use the prescaled to set the counter running at 65536 Hz
-									 // yields maximum frequency of 21kHz when ARR = 2;
-	TIM14->ARR = (48000000UL/(uint32_t)(TIM14->PSC))/((uint32_t)C4);
-	TIM14->CCR1 = TIM14->ARR/2;	
-	TIM14->CNT = 0;
+    // Enable TIM14 clock
+    RCC->APB1ENR |= (1 << 8);
+    pinMode(GPIOB, 1, 2);            // Set GPIOB pin 1 to alternate function
+    GPIOB->AFR[0] &= ~(0x0F << 4);   // Set alternate function 0 for GPIOB1
+
+    TIM14->CR1 = 0;                      // Reset Timer 14 control register
+    TIM14->CCMR1 = (1 << 6) + (1 << 5);  // Configure PWM mode 1
+    TIM14->CCER |= (1 << 0);             // Enable output on channel 1
+    TIM14->PSC = 48000000UL / 65536UL;   // Prescaler to set 65536 Hz base frequency
+    TIM14->ARR = 65536 / 440;            // Set ARR for 440 Hz frequency
+    TIM14->CCR1 = TIM14->ARR / 2;        // 50% duty cycle
+    TIM14->CNT = 0;                      // Reset counter
+    TIM14->CR1 |= (1 << 0);              // Enable the counter
 }
