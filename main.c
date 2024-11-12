@@ -27,10 +27,10 @@ int collisionCheck();
 void startMenu();
 void multiplayer();
 // game mechanics
-int jump_velocity = 0;
-int is_jumping = 0;
-int gravity = 1;
-int jumpUp = -11; // how far the dino jumps (strength)
+float jump_velocity = 0;
+float is_jumping = 0;
+float gravity = 0.5;
+int jumpUp = -7; // how far the dino jumps (strength)
 int duck = 0;
 // characters positions 
 float star_x = 100;
@@ -222,9 +222,9 @@ void runGame()
 		}
 
 		// Clear the previous Dino jumping position
-		if (dino_y < 90	)
+		if (dino_y < 84	)
 		{
-			fillRectangle(20, dino_y + 11, 20, 20, backgroundColour);
+			fillRectangle(20, dino_y + 7, 20, 20, backgroundColour);
 		}
 
 		if (dino_y <= 90)
@@ -369,7 +369,6 @@ int updateObstaclePos(int speed, int random)
 		{
 			fillRectangle(star_x, obstacle_air, 23, 23, 0x8ABC);
 			star_x = 108;// takes it back the right side of the screen
-			score++;
 			random = ((rand() % 2) + 1);
 		}
 	}
@@ -380,7 +379,7 @@ int updateObstaclePos(int speed, int random)
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
 			obstacle_ground_x = 112;// takes it back the right side of the screen
-			score++;
+
 			random = ((rand() % 2) + 1);
 		}
 	}
@@ -391,7 +390,6 @@ int updateObstaclePos(int speed, int random)
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
 			obstacle_ground_x = 112;// takes it back the right side of the screen
-			score++;
 			random = ((rand() % 2) + 1);
 		}
 	}
@@ -435,7 +433,7 @@ void multiplayer() {
 	runGame();
 	player1 = score;
 	GPIOA->ODR &= ~(1 << 0);
-	
+
 	// Player 2's Run Through
 	fillRectangle(0,0,128,160,backgroundColour);
 	printTextX2("Player 2", 6,20,RGBToWord(255,255,255),0x8abc);
