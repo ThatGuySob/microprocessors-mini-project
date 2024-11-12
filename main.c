@@ -206,7 +206,7 @@ void runGame()
 	uint32_t scoreUpdate = 0;
 	int frame_counter = 0; // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was update
-	int speed = 1;
+	int speed = 0;
 	uint32_t speedTime = milliseconds;
 	int random = (rand() % 3) + 1;
 
@@ -229,11 +229,6 @@ void runGame()
 		if ((GPIOA->IDR & (1 << 11)) == 0 && !is_jumping) 
 		{ 
 			duck = 1;	 
-		}
-
-		if ((milliseconds - speedTime) >= 50000) {
-			speed++;
-			speedTime = milliseconds;
 		}
 
 		// Only update the frame every 100 ms (adjust for preferred frame rate)
@@ -343,6 +338,18 @@ void runGame()
 
 			if (score % 50 == 0 && score > 0) {
 				playNote(200);
+			} else if (score % 20 == 0 && score > 0) {
+				speed = speedInc(speed);
+				int randomiser = (rand() % 3) + 1;
+
+
+				if (randomiser == 1) {
+					speed = 1;
+				} else if (randomiser == 2) {
+					speed = 2;
+				} else if (randomiser == 3) {
+					speed = 0;
+				}
 			} else {
 				playNote(0);
 			}
@@ -391,37 +398,51 @@ void updateDinoPos(){
 
 }
 
+int speedInc(int speed) {
+	int randomiser = (rand() % 3) + 1;
+
+
+	if (randomiser == 1) {
+		speed = 1;
+	} else if (randomiser == 2) {
+		speed = 3;
+	} else if (randomiser == 3) {
+		speed = 4;
+	}
+}
+
 int updateObstaclePos(int speed, int random)
 {
+	int speedIncrease = speedInc(speed);
 	if(random == 1)
 	{
-		star_x -= 2 * speed; //moves stars left
+		star_x -= 2 + speed; //moves stars left
 		if(star_x < -19)// moves the star offscreen
 		{
 			fillRectangle(star_x, obstacle_air, 23, 23, 0x8ABC);
 			star_x = 108;// takes it back the right side of the screen
-			random = ((rand() % 2) + 1);
+			random = ((rand() % 3) + 1);
 		}
 	}
 	if(random == 2)
 	{
-		obstacle_ground_x -= 2 * speed;
+		obstacle_ground_x -= 2 + speed;
 		if(obstacle_ground_x < -10)// moves the star offscreen
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
 			obstacle_ground_x = 112;// takes it back the right side of the screen
 
-			random = ((rand() % 2) + 1);
+			random = ((rand() % 3) + 1);
 		}
 	}
 	if(random == 3)
 	{
-		obstacle_ground_x -= 2 * speed;
+		obstacle_ground_x -= 2 + speed;
 		if(obstacle_ground_x < -10)// moves the star offscreen
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
 			obstacle_ground_x = 112;// takes it back the right side of the screen
-			random = ((rand() % 2) + 1);
+			random = ((rand() % 3) + 1);
 		}
 	}
 	return random;
