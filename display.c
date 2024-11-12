@@ -180,8 +180,10 @@ uint8_t transferSPI8(uint8_t data)
     while (((SPI1->SR & (1 << 7))!=0)&&(Timeout--));
     *preg = data;
     Timeout = 1000000;
-    while (((SPI1->SR & (1 << 7))!=0)&&(Timeout--));        
-	  ReturnValue = *preg;	
+    while (((SPI1->SR & (1 << 7))!=0)&&(Timeout--));  
+    {      
+	     ReturnValue = *preg;	
+    }
     return ReturnValue;
 }
 
@@ -621,12 +623,19 @@ uint32_t mystrlen(const char *s)
 	return len;
 }
 
-void displayScore(int score) {
+void displayScore(int score, int highscore) {
     char scoreText[10];
     sprintf(scoreText, "%d", score);
+    char highscoreText[10];
+    sprintf(highscoreText, "%d", highscore);
     int x = SCREEN_WIDTH - 30;  // Adjust based on font width
     int y = 5;
+    
 
-    fillRectangle(x, y, 40, 10, 0x0FF0);  // Clear with background color
-    printText(scoreText, x, y, 0x0, 0x0FF0);  // Display in white
+    fillRectangle(x, y, 40, 10, 0x8ABC);  // Clear with background color
+    printText(scoreText, x, y+10, 0x0, 0x8ABC);  // Display in white
+    printText("S:", x-14, y+10, 0x0, 0x8ABC); 
+    fillRectangle(x, y, 40, 10, 0x8ABC);  // Clear with background color
+    printText(highscoreText, x, y, 0x0, 0x8ABC);  // Display in white
+    printText("H:", x-14, y, 0x0, 0x8ABC); 
 }
