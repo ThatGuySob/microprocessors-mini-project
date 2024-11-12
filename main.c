@@ -1,6 +1,7 @@
 #include <stm32f031x6.h>
 #include <stdlib.h>
 #include "display.h"
+#include "sound.h"
 
 void initClock(void);
 void initSysTick(void);
@@ -139,6 +140,8 @@ int main()
 	initClock();
 	initSysTick();
 	setupIO();
+	initSound();
+	playNote(0);
 	displayScore(score, highScore);
 	startMenu(); //displays a start menu at the start
 
@@ -193,6 +196,8 @@ void resetGame(void)
 	obstacle_ground_x = 112;
     displayScore(score, highScore); // Display initial score
 	makeBackground();
+	playNote(0);
+	
 
 }
 
@@ -347,7 +352,14 @@ void runGame()
 			char gameover[10];
 			sprintf(gameover, "\nGame Over!\n", gameover);
 			eputs(gameover);
+
+			if (score % 50 == 0 && score > 0) {
+				playNote(200);
+			} else {
+				playNote(0);
+			}
 			break;
+
 		}
 
 		delay(50); // Maintain overall game speed
