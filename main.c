@@ -3,7 +3,6 @@
 #include "display.h"
 #include "sound.h"
 
-// functions provided in previous classes
 void initClock(void);
 void initSysTick(void);
 void SysTick_Handler(void);
@@ -12,6 +11,7 @@ void setupIO();
 int isInside(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t px, uint16_t py);
 void enablePullUp(GPIO_TypeDef *Port, uint32_t BitNumber);
 void pinMode(GPIO_TypeDef *Port, uint32_t BitNumber, uint32_t Mode);
+void makeBackground();
 void eputchar(char c);
 char egetchar(void);
 void eputs(char *String); 
@@ -22,17 +22,16 @@ void USART1_sendString(const char *str);
 	game variables
 -------------------*/
 // function signatures for game mechanics
-void makeBackground();
 void updateDinoPos();
-void startMenu();
-void multiplayer();
 int updateObstaclePos(int speed, int random);
 int collisionCheck();
+void startMenu();
+void multiplayer();
 // game mechanics
 float jump_velocity = 0;
 float is_jumping = 0;
-float gravity = 0.5; 
-int jumpUp = -7; // how far the dino jumps (strength)
+float gravity = 0.5;
+int jumpUp = -6; // how far the dino jumps (strength)
 int duck = 0;
 // characters positions 
 float star_x = 100;
@@ -44,6 +43,7 @@ float dino_x = 20;
 float dino_size = 20;
 float star_size = 20;
 int gordo_size = 16;
+
 // game over 
 int score = 0;
 int gameover = 0;
@@ -138,24 +138,24 @@ int main()
 	setupIO();
 	initSound();
 	playNote(0);
-	displayScore(score, highScore); //displays player score
-	startMenu(); //displays a start menu before the game starts
+	displayScore(score, highScore);
+	startMenu(); //displays a start menu at the start
 
 
     while (1)
     {
-		if ((GPIOB->IDR & (1 << 5))==0) // left button pressed
+		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
 		{		
-			resetGame(); // Reset game state before starting the game
-			runGame();//starts singleplayer game
-			delay(2000);// waits for 2s after game ends
-			startMenu();//start menu is displayed
+			resetGame();  // Reset game state before starting the game
+			runGame();
+			delay(2000);
+			startMenu();
 			continue;
 		} 
 		else if ((GPIOB->IDR & (1 << 4))==0) // right pressed
        	{
-			resetGame(); // Reset game state before starting the game
-			multiplayer(); //starts multiplayer game
+			resetGame();  // Reset game state before starting the game
+			multiplayer();
 			continue;
 	   	}
     }
@@ -164,11 +164,9 @@ int main()
 	return 0;
 }
 
-// start menu that displays before the game starts
+//start menu that prompts the players
 void startMenu(){
-	fillRectangle(0,0,128,160,backgroundColour); //clears the screen with background colour
-
-	// displays the start menu's text
+	fillRectangle(0,0,128,160,backgroundColour);
 	printTextX2("Kirby Jump", 6,20,RGBToWord(255,255,255),0x8abc);
 	printText("Press Left",30,50,RGBToWord(255,255,255),0x8abc);
 	printText("to Start",37,60,RGBToWord(255,255,255),0x8abc);
@@ -176,86 +174,89 @@ void startMenu(){
 	printText("Press Right",30,90,RGBToWord(255,255,255),0x8abc);
 	printText("for Multiplayer",15,100,RGBToWord(255,255,255),0x8abc);
 	
-	//displays a splashart
 	putImage(20, 117, 88, 43, splashart, 0, 0);
 	
-	//turns red LED off
+	
 	GPIOA->ODR &= ~(1 << 0);
 
 }
 
-//resets the game state and variables
 void resetGame(void)
 {
+    // Reset game variables and state
     score = 0; // Reset score
-    dino_y = 90; // Reset Dino position to ground level
+    dino_y = 90; // Reset Dino position
     is_jumping = 0; // Reset jump state
     jump_velocity = 0; // Reset jump velocity
     star_x = 108;// Resets the star's position
-	obstacle_ground_x = 112; //resets ground obstacles
+	obstacle_ground_x = 112;
     displayScore(score, highScore); // Display initial score
-	makeBackground(); //refreshes the backgrouns
-	playNote(0);//resets sound
+	makeBackground();
+	playNote(0);
 	
 
 }
 
-//main game loop for single player mode
 void runGame()
 {
-	uint32_t scoreUpdate = 0; //timer for updating score
-	uint32_t speedTime = milliseconds; //speed increase timer
-	unsigned int last_frame_time = 0; // Time when last frame was update
+	uint32_t scoreUpdate = 0;
 	int frame_counter = 0; // To track which animation frame to display
-	int speed = 0; //speed of the obstacles
-	int random = (rand() % 3) + 1; //randomly generates a number that displays the obstacle
-	char gamestart[10];
+	unsigned int last_frame_time = 0; // Time when last frame was update
+	int speed = 0;
+	uint32_t speedTime = milliseconds;
+	int random = (rand() % 3) + 1;
 
+	char gamestart[10];
 	sprintf(gamestart, "\nGame Start!\n", gamestart);
 	eputs(gamestart);
 
 	while (1)
-	{	
-		//jump if up button is pressed
+	{
 		if ((GPIOA->IDR & (1 << 8)) == 0 && !is_jumping) 
-		{ 
-			is_jumping = 1; //sets state of jump
-			jump_velocity = jumpUp; // jump start velocity
+		{ // up button is pressed
+			is_jumping = 1;
+			jump_velocity = jumpUp; // jump starts velocity
 		}
 
-		//displays sun image in the background
 		putImage(5, 5, 10, 10, sun, 0, 0);
 		updateDinoPos();
-		random = updateObstaclePos(speed, random); //moves obstacle
+		random = updateObstaclePos(speed, random);
 
-		if ((GPIOA->IDR & (1 << 11)) == 0 && !is_jumping){ 
+		if ((GPIOA->IDR & (1 << 11)) == 0 && !is_jumping) 
+		{ 
 			duck = 1;	 
 		}
 
 		// Only update the frame every 100 ms (adjust for preferred frame rate)
-		if (milliseconds - last_frame_time >= 100){
+		if (milliseconds - last_frame_time >= 100) 
+		{
 			frame_counter = (frame_counter + 1) % 4; // Loop through frames 0 to 3
 			last_frame_time = milliseconds;
 		}
 
 		// Clear the previous Dino jumping position
-		if (dino_y < 85	){
+		if (dino_y < 85	)
+		{
 			fillRectangle(20, dino_y + 6, 20, 20, backgroundColour);
 		}
-		if (dino_y <= 90){
+
+		if (dino_y <= 90)
+		{
 			fillRectangle(20, dino_y - 11, 20, 20, backgroundColour);
 		}
 
 
 		// Display the correct animation based on jumping and falling state
-		if (is_jumping && jump_velocity > 0) { 
-			// Jumping up: show animation frames
+		if (is_jumping && jump_velocity > 0) 
+		{ // Jumping up: show animation frames
 			putImage(dino_x, dino_y, 20, 20, fall, 0, 0);
-		} else if (is_jumping && jump_velocity <= 0){ 
-			// Falling down: show fall frame
+		} 
+		else if (is_jumping && jump_velocity <= 0) 
+		{ // Falling down: show fall frame
 			putImage(dino_x, dino_y, 20, 20, fall, 0, 0);
-		} else if (duck > 0){ 
-			// Jumping up: show animation frames
+		}
+		else if (duck > 0) 
+		{ // Jumping up: show animation frames
 			fillRectangle(20, dino_y-4, 20, 20, backgroundColour);
 
 			switch (frame_counter) 
@@ -265,8 +266,9 @@ void runGame()
 				case 2: putImage(20, dino_y+10, 20, 10, crouch3, 0, 0); break;
 				case 3: putImage(20, dino_y+10, 20, 10, crouch2, 0, 0); break;
 			} 
-		} else { 
-			// Default running animation when on the ground
+		}
+		else 
+		{ // Default running animation when on the ground
 			switch (frame_counter) 
 			{
 				case 0: putImage(20, dino_y, 20, 20, run1, 0, 0); break;
@@ -276,11 +278,10 @@ void runGame()
 			}
 		}
 
-		if (random == 1){	
-			// Clear previous position and display current frame for obstacle
+		if (random == 1)
+		{	// Clear previous position and display current frame for obstacle
 			fillRectangle(star_x+1, obstacle_air, 26, 24, backgroundColour);
 
-			//star animation
 			switch (frame_counter) 
 			{
 				case 0: putImage(star_x, obstacle_air, 20, 20, star1, 0, 0); break;
@@ -288,10 +289,11 @@ void runGame()
 				case 2: putImage(star_x, obstacle_air, 20, 20, star3, 0, 0); break;
 				case 3: putImage(star_x, obstacle_air, 20, 20, star4, 0, 0); break;
 			}
-		} else if(random == 2){
+		}
+		else if(random == 2)
+		{
 			fillRectangle(obstacle_ground_x+6, obstacle_ground, 17, 16, backgroundColour);
-			
-			//gordo (spiky ball) animation
+
 			switch (frame_counter) 
 			{
 				case 0: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
@@ -299,10 +301,12 @@ void runGame()
 				case 2: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
 				case 3: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
 			}
-		} else if(random == 3){
+		}
+
+		else if(random == 3)
+		{
 			fillRectangle(obstacle_ground_x+6, obstacle_ground, 17, 16, backgroundColour);
 
-			//waddle animation
 			switch (frame_counter) 
 			{
 				case 0: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle1, 0, 0); break;
@@ -314,27 +318,24 @@ void runGame()
 
 
 		// tracks the player's score and updates it accordingly
-		if ((milliseconds - scoreUpdate) >= 200){
-			score++; //increments the score
-
-			//updates the high score
-			if (highScore <= score){
+		if ((milliseconds - scoreUpdate) >= 200) 
+		{
+			score++;
+			if (highScore <= score)
+			{
 				highScore = score;
 			}
-
-			//displays the score
 			displayScore(score, highScore);
 			scoreUpdate = milliseconds;
 
 			char scoreString[10];
 			sprintf(scoreString, "Score: %d\n", score);
 			eputs(scoreString);
-			
-			//plays a beep sound at every score milestone
+
 			if (score % 50 == 0 && score > 0) {
 				playNote(200);
 			} else if (score % 49 == 0 && score > 0) {
-				speed = speedInc(speed, score); //increases speed
+				speed = speedInc(speed, score);
 			} else {
 				playNote(0);
 			}
@@ -344,8 +345,7 @@ void runGame()
 		// if yes, then the game stops and game over displays
 		if(collisionCheck()){
 			printTextX2("Game Over",10,50,RGBToWord(255,0,0),0x8ABC);
-			
-			//displays a dead kirby
+
 			putImage(20, dino_y, 20, 10, dead1, 0, 0); break;
 
 			char gameover[10];
@@ -359,9 +359,7 @@ void runGame()
 	}
 }
 
-//updates dino's position
 void updateDinoPos(){
-	//checks if dino is jumping 
     if(is_jumping){ 
         dino_y += jump_velocity; // Applies the velocity to dino's Y position
         jump_velocity += gravity; // Gravity slows the upward movement
@@ -374,31 +372,29 @@ void updateDinoPos(){
         }	
     }
 
-	//handles ducking movement
 	while(duck) 
 	{
-		dino_y = 90; //sets dino's position to ground level
-		//if ducking ends
-		if (duck == 0){
-			dino_y = 80;//moves dino's position back to original
+		dino_y = 90;
+		if (duck == 0)
+		{
+			dino_y = 80;
 		}
-
 		duck = 0;
 	} 
+
 }
 
-//controls the speed of the game  based on player's score
 int speedInc(int speed, int score) {
-    // Increase speed every 20 points
+    // Increase speed every 20 points or adjust as needed
     if (score % 49 == 0 && score > 0 && speed != 3) {
         speed += 1;
     }
     return speed;
 }
 
-//updates the position of the obstacles
-int updateObstaclePos(int speed, int random){
-	//if the obstacle is the star
+
+int updateObstaclePos(int speed, int random)
+{
 	if(random == 1)
 	{
 		star_x -= 2 + speed; //moves stars left
@@ -406,37 +402,34 @@ int updateObstaclePos(int speed, int random){
 		{
 			fillRectangle(star_x, obstacle_air, 23, 23, 0x8ABC);
 			star_x = 108;// takes it back the right side of the screen
-			random = ((rand() % 3) + 1); //randomises the next obstacle type
+			random = ((rand() % 3) + 1);
 		}
 	}
-	//if obstacle is gordo
 	if(random == 2)
 	{
 		obstacle_ground_x -= 2 + speed;
-		if(obstacle_ground_x < -10)
+		if(obstacle_ground_x < -10)// moves the star offscreen
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
-			obstacle_ground_x = 112;
+			obstacle_ground_x = 112;// takes it back the right side of the screen
 
 			random = ((rand() % 3) + 1);
 		}
 	}
-	//if obstacle is waddle
 	if(random == 3)
 	{
 		obstacle_ground_x -= 2 + speed;
-		if(obstacle_ground_x < -10)
+		if(obstacle_ground_x < -10)// moves the star offscreen
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
-			obstacle_ground_x = 112;
+			obstacle_ground_x = 112;// takes it back the right side of the screen
 			random = ((rand() % 3) + 1);
 		}
 	}
-
 	return random;
+
 }
 
-//checks if Dino collides with an obstacle 
 int collisionCheck()
 {
     // Check for overlap in both x and y coordinates
@@ -450,7 +443,6 @@ int collisionCheck()
 		GPIOA->ODR |= (1 << 0); // Turn on red LED
         return 1; // Collision detected
     }
-
     return 0; // No collision
 }
 
@@ -459,10 +451,9 @@ void makeBackground() {
 	fillRectangle(0,110,128, 50, bottomColour);  // black out the screen
 }
 
-//function for multiplayer mode
 void multiplayer() {
-	int player1; //p1 score
-	int player2; //p2 score
+	int player1;
+	int player2;
     char player1Text[10];
     char player2Text[10];
 
@@ -484,14 +475,12 @@ void multiplayer() {
 	runGame();
 	player2 = score;
 
-	//diplays player 1's score
 	fillRectangle(0,0,128,160,backgroundColour);
 	printText("Player 1 Score:",10,20,RGBToWord(255,255,255),0x8abc);
     sprintf(player1Text, "%d", player1);
 	printTextX2(player1Text,30,40,RGBToWord(255,255,255),0x8abc);
 	delay(2000);
 
-	//displays player 2's score
 	printText("Player 2 Score: ",10,80,RGBToWord(255,255,255),0x8abc);
     sprintf(player2Text, "%d", player2);
 	printTextX2(player2Text,30,100,RGBToWord(255,255,255),0x8abc);
@@ -629,7 +618,6 @@ void setupIO()
     USART1->CR1 |= (1 << 3);  // Enable transmitter
     USART1->CR1 |= (1 << 0);  // Enable USART1
 }
-
 void eputchar(char c)
 {
 	while( (USART1->ISR & (1 << 6)) == 0); // wait for any ongoing transmission to finish
@@ -650,9 +638,10 @@ void eputs(char *String)
 	}
 }
 
+
 int serial_available(void)
 {
-	if((USART1->ISR & (1 << 5)) == 0)
+	if( (USART1->ISR & (1 << 5)) == 0)
 		return 0;
 	else
 		return 1;
@@ -660,7 +649,8 @@ int serial_available(void)
 
 void USART1_sendString(const char *str)
 {
-    while (*str){
+    while (*str) 
+	{
         USART1_sendChar(*str++);
     }
 }
