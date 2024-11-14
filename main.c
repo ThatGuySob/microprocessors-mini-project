@@ -138,7 +138,7 @@ int main()
 	setupIO();
 	initSound();
 	playNote(0);
-	displayScore(score, highScore);
+	displayScore(score, highScore);//dispalys score
 	startMenu(); //displays a start menu at the start
 
 
@@ -146,16 +146,16 @@ int main()
     {
 		if ((GPIOB->IDR & (1 << 5))==0) // left pressed
 		{		
-			resetGame();  // Reset game state before starting the game
-			runGame();
+			resetGame(); // Reset game state before starting the game
+			runGame(); //main game for single player
 			delay(2000);
 			startMenu();
 			continue;
 		} 
 		else if ((GPIOB->IDR & (1 << 4))==0) // right pressed
        	{
-			resetGame();  // Reset game state before starting the game
-			multiplayer();
+			resetGame(); // Reset game state before starting the game
+			multiplayer(); //main game for multiplayer 
 			continue;
 	   	}
     }
@@ -166,7 +166,8 @@ int main()
 
 //start menu that prompts the players
 void startMenu(){
-	fillRectangle(0,0,128,160,backgroundColour);
+	fillRectangle(0,0,128,160,backgroundColour); //clears screen with background colour
+	//displays the start menu's text
 	printTextX2("Kirby Jump", 6,20,RGBToWord(255,255,255),0x8abc);
 	printText("Press Left",30,50,RGBToWord(255,255,255),0x8abc);
 	printText("to Start",37,60,RGBToWord(255,255,255),0x8abc);
@@ -174,13 +175,14 @@ void startMenu(){
 	printText("Press Right",30,90,RGBToWord(255,255,255),0x8abc);
 	printText("for Multiplayer",15,100,RGBToWord(255,255,255),0x8abc);
 	
+	//displays kirby splashart 
 	putImage(20, 117, 88, 43, splashart, 0, 0);
 	
-	
+	//turns off the red LED
 	GPIOA->ODR &= ~(1 << 0);
-
 }
 
+//resets game state and varuables
 void resetGame(void)
 {
     // Reset game variables and state
@@ -189,22 +191,23 @@ void resetGame(void)
     is_jumping = 0; // Reset jump state
     jump_velocity = 0; // Reset jump velocity
     star_x = 108;// Resets the star's position
-	obstacle_ground_x = 112;
+	obstacle_ground_x = 112; //x co-ordinate of ground obstacles
     displayScore(score, highScore); // Display initial score
-	makeBackground();
-	playNote(0);
+	makeBackground();//refreshes the background 
+	playNote(0);//resets sound
 	
 
 }
 
+//main game function for single player mode
 void runGame()
 {
-	uint32_t scoreUpdate = 0;
+	uint32_t scoreUpdate = 0; //timer for updating score
 	int frame_counter = 0; // To track which animation frame to display
 	unsigned int last_frame_time = 0; // Time when last frame was update
-	int speed = 0;
-	uint32_t speedTime = milliseconds;
-	int random = (rand() % 3) + 1;
+	int speed = 0; //speed of obstacles
+	uint32_t speedTime = milliseconds; //increase speed timer
+	int random = (rand() % 3) + 1; //randomly generates a number, which displays an obstacle 
 
 	char gamestart[10];
 	sprintf(gamestart, "\nGame Start!\n", gamestart);
@@ -212,16 +215,18 @@ void runGame()
 
 	while (1)
 	{
-		if ((GPIOA->IDR & (1 << 8)) == 0 && !is_jumping) 
-		{ // up button is pressed
-			is_jumping = 1;
+		if ((GPIOA->IDR & (1 << 8)) == 0 && !is_jumping) //jump if the up button is presed
+		{ 
+			is_jumping = 1; //sets jump state
 			jump_velocity = jumpUp; // jump starts velocity
 		}
 
+		//displays the sun image in the background
 		putImage(5, 5, 10, 10, sun, 0, 0);
-		updateDinoPos();
-		random = updateObstaclePos(speed, random);
+		updateDinoPos(); 
+		random = updateObstaclePos(speed, random); //moves the abstacle
 
+		//duck check
 		if ((GPIOA->IDR & (1 << 11)) == 0 && !is_jumping) 
 		{ 
 			duck = 1;	 
@@ -261,6 +266,7 @@ void runGame()
 
 			switch (frame_counter) 
 			{
+				//ducking animation
 				case 0: putImage(20, dino_y+10, 20, 10, crouch1, 0, 0); break;
 				case 1: putImage(20, dino_y+10, 20, 10, crouch2, 0, 0); break;
 				case 2: putImage(20, dino_y+10, 20, 10, crouch3, 0, 0); break;
@@ -271,6 +277,7 @@ void runGame()
 		{ // Default running animation when on the ground
 			switch (frame_counter) 
 			{
+				//running animation
 				case 0: putImage(20, dino_y, 20, 20, run1, 0, 0); break;
 				case 1: putImage(20, dino_y, 20, 20, run2, 0, 0); break;
 				case 2: putImage(20, dino_y, 20, 20, run3, 0, 0); break;
@@ -284,6 +291,7 @@ void runGame()
 
 			switch (frame_counter) 
 			{
+				//star animation
 				case 0: putImage(star_x, obstacle_air, 20, 20, star1, 0, 0); break;
 				case 1: putImage(star_x, obstacle_air, 20, 20, star2, 0, 0); break;
 				case 2: putImage(star_x, obstacle_air, 20, 20, star3, 0, 0); break;
@@ -296,6 +304,7 @@ void runGame()
 
 			switch (frame_counter) 
 			{
+				//gordo animation (spiky ball)
 				case 0: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
 				case 1: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo1, 0, 0); break;
 				case 2: putImage(obstacle_ground_x, obstacle_ground, 16, 16, gordo2, 0, 0); break;
@@ -309,6 +318,7 @@ void runGame()
 
 			switch (frame_counter) 
 			{
+				//waddle animation
 				case 0: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle1, 0, 0); break;
 				case 1: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle1, 0, 0); break;
 				case 2: putImage(obstacle_ground_x, obstacle_ground, 16, 16, waddle2, 0, 0); break;
@@ -320,11 +330,14 @@ void runGame()
 		// tracks the player's score and updates it accordingly
 		if ((milliseconds - scoreUpdate) >= 200) 
 		{
-			score++;
+			score++; //increments the score
+
+			//updates higgh score
 			if (highScore <= score)
 			{
 				highScore = score;
 			}
+			//displays the score
 			displayScore(score, highScore);
 			scoreUpdate = milliseconds;
 
@@ -332,6 +345,7 @@ void runGame()
 			sprintf(scoreString, "Score: %d\n", score);
 			eputs(scoreString);
 
+			//plays a beep sound at every score milestone
 			if (score % 50 == 0 && score > 0) {
 				playNote(200);
 			} else if (score % 49 == 0 && score > 0) {
@@ -346,6 +360,7 @@ void runGame()
 		if(collisionCheck()){
 			printTextX2("Game Over",10,50,RGBToWord(255,0,0),0x8ABC);
 
+			//displays a dead kirby
 			putImage(20, dino_y, 20, 10, dead1, 0, 0); break;
 
 			char gameover[10];
@@ -359,7 +374,9 @@ void runGame()
 	}
 }
 
+//updates kirby's position
 void updateDinoPos(){
+	//checks if kirby is jumping
     if(is_jumping){ 
         dino_y += jump_velocity; // Applies the velocity to dino's Y position
         jump_velocity += gravity; // Gravity slows the upward movement
@@ -371,30 +388,32 @@ void updateDinoPos(){
             is_jumping = 0; // End the jump
         }	
     }
-
+	//handles ducking position
 	while(duck) 
 	{
-		dino_y = 90;
+		dino_y = 90;//sets kirby's position to ground level
 		if (duck == 0)
 		{
-			dino_y = 80;
+			dino_y = 80;//moves kirby's position back to original state
 		}
 		duck = 0;
 	} 
-
 }
 
+//controls speed of the game based on player's score
 int speedInc(int speed, int score) {
-    // Increase speed every 20 points or adjust as needed
+    // Increase speed every 20 points. Capped at speed 3
     if (score % 49 == 0 && score > 0 && speed != 3) {
         speed += 1;
     }
+
     return speed;
 }
 
-
+//updates the position of the obstacles
 int updateObstaclePos(int speed, int random)
-{
+{	
+	//star obstacle
 	if(random == 1)
 	{
 		star_x -= 2 + speed; //moves stars left
@@ -405,43 +424,47 @@ int updateObstaclePos(int speed, int random)
 			random = ((rand() % 3) + 1);
 		}
 	}
+	//gordo obstacle
 	if(random == 2)
 	{
 		obstacle_ground_x -= 2 + speed;
-		if(obstacle_ground_x < -10)// moves the star offscreen
+		if(obstacle_ground_x < -10)
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
-			obstacle_ground_x = 112;// takes it back the right side of the screen
+			obstacle_ground_x = 112;
 
 			random = ((rand() % 3) + 1);
 		}
 	}
+	//waddle obstacle
 	if(random == 3)
 	{
 		obstacle_ground_x -= 2 + speed;
-		if(obstacle_ground_x < -10)// moves the star offscreen
+		if(obstacle_ground_x < -10)
 		{
 			fillRectangle(obstacle_ground_x, 88, 22, 22, 0x8ABC);
-			obstacle_ground_x = 112;// takes it back the right side of the screen
+			obstacle_ground_x = 112;
 			random = ((rand() % 3) + 1);
 		}
 	}
-	return random;
 
+	return random;
 }
 
+//check if kirby collides with an obstacle based on if kirby's co-ordinates overlaps with the co-ordinates of the obstacle
 int collisionCheck()
 {
-    // Check for overlap in both x and y coordinates
+    //checks for collision with the star obstacle
     if (((dino_x < star_x + star_size) && (dino_x + dino_size > star_x) && (dino_y < obstacle_air + star_size) && (dino_y + dino_size > obstacle_air)) && !duck) 
 	{
 		GPIOA->ODR |= (1 << 0); // Turn on red LED
         return 1; // Collision detected
     }
+	//checks for collision with the ground obstacles (gordo and waddle)
 	else if ((dino_x < obstacle_ground_x + gordo_size) && (dino_x + dino_size > obstacle_ground_x) && (dino_y < obstacle_ground + gordo_size) && (dino_y + dino_size > obstacle_ground)) 
 	{
-		GPIOA->ODR |= (1 << 0); // Turn on red LED
-        return 1; // Collision detected
+		GPIOA->ODR |= (1 << 0); 
+        return 1; 
     }
     return 0; // No collision
 }
@@ -451,9 +474,10 @@ void makeBackground() {
 	fillRectangle(0,110,128, 50, bottomColour);  // black out the screen
 }
 
+//function for multiplayer mode
 void multiplayer() {
-	int player1;
-	int player2;
+	int player1; //p1's score
+	int player2; //p2's score
     char player1Text[10];
     char player2Text[10];
 
@@ -464,8 +488,9 @@ void multiplayer() {
 	delay(2000);
 	resetGame();
 	runGame();
-	player1 = score;
-	GPIOA->ODR &= ~(1 << 0);
+
+	player1 = score; //tracks score
+	GPIOA->ODR &= ~(1 << 0); //turns off red LED
 
 	// Player 2's Run Through
 	fillRectangle(0,0,128,160,backgroundColour);
@@ -473,8 +498,10 @@ void multiplayer() {
 	delay(2000);
 	resetGame();
 	runGame();
-	player2 = score;
 
+	player2 = score; 
+
+	//displays scores of players
 	fillRectangle(0,0,128,160,backgroundColour);
 	printText("Player 1 Score:",10,20,RGBToWord(255,255,255),0x8abc);
     sprintf(player1Text, "%d", player1);
@@ -486,7 +513,7 @@ void multiplayer() {
 	printTextX2(player2Text,30,100,RGBToWord(255,255,255),0x8abc);
 	delay(2000);
 
-	// checks to see the which player won the game
+	// checks to see the which player won the game and displpays the text accordingly
 	fillRectangle(0,0,128,160,backgroundColour);
 	if (player1 > player2) {
 		printTextX2("Player 1", 15, 60, RGBToWord(0, 255, 0), backgroundColour);
@@ -504,8 +531,6 @@ void multiplayer() {
 	delay(2000);
 	startMenu();
 }
-
-
 
 void initSysTick(void)
 {
