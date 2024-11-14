@@ -29,20 +29,20 @@ void multiplayer();
 int updateObstaclePos(int speed, int random);
 int collisionCheck();
 // game mechanics
-int jump_velocity = 0;
-int is_jumping = 0; 
+float jump_velocity = 0;
+float is_jumping = 0;
 float gravity = 0.5; 
-int jumpUp = -6; // how far the dino jumps (strength)
+int jumpUp = -7; // how far the dino jumps (strength)
 int duck = 0;
 // characters positions 
-int star_x = 100;
-int obstacle_air = 76; 
-int obstacle_ground = 94;
-int obstacle_ground_x = 100;
-int dino_y = 90;
-int dino_x = 20;
-int dino_size = 20;
-int star_size = 20;
+float star_x = 100;
+float obstacle_air = 76; 
+float obstacle_ground = 94;
+float obstacle_ground_x = 100;
+float dino_y = 90;
+float dino_x = 20;
+float dino_size = 20;
+float star_size = 20;
 int gordo_size = 16;
 // game over 
 int score = 0;
