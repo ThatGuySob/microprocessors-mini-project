@@ -210,7 +210,7 @@ void runGame()
 	int random = (rand() % 3) + 1; //randomly generates a number, which displays an obstacle 
 
 	char gamestart[10];
-	sprintf(gamestart, "\nGame Start!\n", gamestart);
+	sprintf(gamestart, "\nGame Start!\n", gamestart); //display game start in serial port console
 	eputs(gamestart);
 
 	while (1)
@@ -343,7 +343,7 @@ void runGame()
 
 			char scoreString[10];
 			sprintf(scoreString, "Score: %d\n", score);
-			eputs(scoreString);
+			eputs(scoreString); //print the score continuiously to the serial port
 
 			//plays a beep sound at every score milestone
 			if (score % 50 == 0 && score > 0) {
@@ -365,7 +365,7 @@ void runGame()
 
 			char gameover[10];
 			sprintf(gameover, "\nGame Over!\n", gameover);
-			eputs(gameover);
+			eputs(gameover); //display game over to the serial port 
 			break;
 
 		}
@@ -666,13 +666,13 @@ void eputs(char *String)
 
 int serial_available(void)
 {
-	if( (USART1->ISR & (1 << 5)) == 0)
+	if( (USART1->ISR & (1 << 5)) == 0) //detect whether serial is available
 		return 0;
 	else
 		return 1;
 }
 
-void USART1_sendString(const char *str)
+void USART1_sendString(const char *str) //send the character string to the serial port
 {
     while (*str) 
 	{
